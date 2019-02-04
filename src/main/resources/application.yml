@@ -1,0 +1,15 @@
+server:
+  port: @server.port@
+management:
+  security:
+    flag: false
+  metrics:
+    export:
+      statsd:
+        flavor: etsy
+spring:
+  application:
+    name: @project.name@
+info:
+  version: @project.version@
+  stage: dev
