@@ -1,5 +1,29 @@
 server:
   port: @server.port@
+spring:
+  application:
+    name: @project.name@
+info:
+  version: @project.version@
+  stage: dev
+
+preparing:
+  delay: 5000
+
+operations:
+  lifetime: 60000
+  event-delay: 120000
+  hovering-delay: 240000
+  event-error-timeout: 30000
+
+kafka:
+  servers: "localhost:29092"
+  topic: "fault-detector"
+  client.id: "fault-detector"
+  group.id: "fault-detector"
+  fault-detector:
+    group.id: "fault-detector"
+
 management:
   security:
     flag: false
@@ -7,13 +31,3 @@ management:
     export:
       statsd:
         flavor: etsy
-spring:
-  application:
-    name: @project.name@
-info:
-  version: @project.version@
-  stage: dev
-preparing:
-  delay: 5000
-operations:
-  lifetime: 60000

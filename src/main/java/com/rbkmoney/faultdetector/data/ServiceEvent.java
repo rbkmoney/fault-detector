@@ -5,6 +5,8 @@ import lombok.Data;
 @Data
 public class ServiceEvent {
 
+    private String serviceId;
+
     private String requestId;
 
     private Long startTime;

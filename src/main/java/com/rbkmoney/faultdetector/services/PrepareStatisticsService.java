@@ -19,7 +19,7 @@ public class PrepareStatisticsService {
     private final Handler prepareStatisticsHandler;
 
     @Scheduled(fixedDelayString = "${preparing.delay}")
-    public void prepare() {
+    public void prepare() throws Exception {
         log.debug("Start processing the services statistics");
         for (String serviceId : serviceEventMap.keySet()) {
             prepareStatisticsHandler.handle(serviceId);

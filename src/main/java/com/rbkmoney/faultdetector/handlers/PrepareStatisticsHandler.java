@@ -2,8 +2,9 @@ package com.rbkmoney.faultdetector.handlers;
 
 import com.rbkmoney.faultdetector.data.ServiceAvailability;
 import com.rbkmoney.faultdetector.data.ServiceEvent;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -14,15 +15,17 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class PrepareStatisticsHandler implements Handler {
+public class PrepareStatisticsHandler implements Handler<String> {
 
-    private final Map<String, ServiceAvailability> availabilityMap;
+    @Autowired
+    private Map<String, ServiceAvailability> availabilityMap;
 
-    private final Map<String, Map<String, ServiceEvent>> serviceEventMap;
+    @Autowired
+    private Map<String, Map<String, ServiceEvent>> serviceEventMap;
     // TODO: для каждого сервиса должна быть возможность перезадать этот параметр, т.к.
     //       время выполнения операции может существенно отличаться
-    private long eventErrorTimeout = 30000;
+    @Value("${operations.event-error-timeout}")
+    private long eventErrorTimeout;
 
     @Override
     public void handle(String serviceId) {

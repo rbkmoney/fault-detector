@@ -1,7 +1,7 @@
 package com.rbkmoney.faultdetector.handlers;
 
-public interface Handler {
+public interface Handler<T> {
 
-    void handle(String id);
+    void handle(T id) throws Exception;
 
 }
