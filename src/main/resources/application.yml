@@ -13,3 +13,7 @@ spring:
 info:
   version: @project.version@
   stage: dev
+preparing:
+  delay: 5000
+operations:
+  lifetime: 60000

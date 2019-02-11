@@ -14,7 +14,7 @@
     <packaging>jar</packaging>
 
     <name>Fault detector</name>
-    <description>Serviecs fault detector</description>
+    <description>Services fault detector</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -46,7 +46,7 @@
         <dependency>
             <groupId>com.rbkmoney</groupId>
             <artifactId>fault-detector-proto</artifactId>
-            <version>1.13-8cbf78e</version>
+            <version>1.15-641c4c4</version>
         </dependency>
 
         <!--spring-->
