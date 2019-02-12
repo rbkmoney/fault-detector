@@ -1,19 +1,19 @@
 package com.rbkmoney.faultdetector.converter;
 
 import com.rbkmoney.faultdetector.data.ServiceEvent;
-import com.rbkmoney.faultdetector.model.Row;
+import com.rbkmoney.faultdetector.model.ServiceEventRow;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ServiceEventToRowConverter implements Converter<ServiceEvent, Row> {
+public class ServiceEventToRowConverter implements Converter<ServiceEvent, ServiceEventRow> {
 
     @Override
-    public Row convert(ServiceEvent serviceEvent) {
-        Row row = new Row();
-        row.setBucketName(serviceEvent.getServiceId());
-        row.setKey(serviceEvent.getRequestId());
-        row.setValue(serviceEvent);
-        return row;
+    public ServiceEventRow convert(ServiceEvent serviceEvent) {
+        ServiceEventRow serviceEventRow = new ServiceEventRow();
+        serviceEventRow.setBucketName(serviceEvent.getServiceId());
+        serviceEventRow.setKey(serviceEvent.getRequestId());
+        serviceEventRow.setValue(serviceEvent);
+        return serviceEventRow;
     }
 }

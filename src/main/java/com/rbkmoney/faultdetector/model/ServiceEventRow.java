@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Row {
+public class ServiceEventRow {
 
     private String bucketName;
     private String key;
