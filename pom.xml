@@ -46,7 +46,7 @@
         <dependency>
             <groupId>com.rbkmoney</groupId>
             <artifactId>fault-detector-proto</artifactId>
-            <version>1.15-641c4c4</version>
+            <version>1.16-d7c9dcb</version>
         </dependency>
 
         <!--spring-->

@@ -1,8 +1,9 @@
 package com.rbkmoney.faultdetector.services;
 
 import com.rbkmoney.damsel.fault_detector.*;
-import com.rbkmoney.faultdetector.data.ServiceAvailability;
+import com.rbkmoney.faultdetector.data.ServiceAggregates;
 import com.rbkmoney.faultdetector.data.ServiceEvent;
+import com.rbkmoney.faultdetector.data.ServiceSettings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
@@ -11,94 +12,88 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.rbkmoney.faultdetector.utils.SettingsUtils.getServiceSettings;
+
 @Slf4j
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class FaultDetectorService implements FaultDetectorSrv.Iface {
 
-    private final Map<String, ServiceAvailability> availabilityMap;
+    private final Map<String, ServiceAggregates> aggregatesMap;
 
-    private final Map<String, Map<String, ServiceEvent>> serviceEventMap;
+    private final Map<String, Map<String, ServiceEvent>> serviceMap;
+
+    private final Map<String, ServiceSettings> serviceConfigMap;
 
     @Override
-    public void registerOperation(String serviceId, String requestId, Operation operation) throws TException {
-        log.debug("Start registration operation {} for service id {} and request id {}",
-                operation, serviceId, requestId);
-        Map<String, ServiceEvent> requestEventMap = serviceEventMap.get(serviceId);
-        if (requestEventMap == null) {
-            requestEventMap = new ConcurrentHashMap<>();
-        }
+    public void initService(String serviceId, ServiceConfig serviceConfig) throws TException {
+        setServiceSettings(serviceId, serviceConfig);
+        serviceMap.put(serviceId, new ConcurrentHashMap<>());
+        log.info("Service {} have been initialized", serviceId);
+    }
 
-        if (operation.isSetStart()) {
+    private void setServiceSettings(String serviceId, ServiceConfig serviceConfig) {
+        ServiceSettings serviceSettings = getServiceSettings(serviceConfig);
+        serviceConfigMap.put(serviceId, serviceSettings);
+    }
+
+    @Override
+    public void registerOperation(String serviceId,
+                                  Operation operation,
+                                  ServiceConfig serviceConfig) throws ServiceNotFoundException, TException {
+        log.info("Start registration operation {} for service {}", operation, serviceId);
+        if (serviceConfigMap.get(serviceId) == null || serviceMap.get(serviceId) == null) {
+            log.error("Service {} is not initialized", serviceId);
+            throw new ServiceNotFoundException();
+        }
+        setServiceSettings(serviceId, serviceConfig);
+
+        Map<String, ServiceEvent> serviceEventsMap = serviceMap.get(serviceId);
+
+        OperationState operationState = operation.getState();
+        if (operationState.isSetStart()) {
             ServiceEvent event = new ServiceEvent();
-            event.setRequestId(requestId);
-            event.setStartTime(new Long(operation.getStart().getTimeStart()));
-            requestEventMap.put(requestId, event);
+            String operationId = operation.getOperationId();
+            event.setOperationId(operationId);
+            event.setStartTime(new Long(operationState.getStart().getTimeStart()));
+            serviceEventsMap.put(operationId, event);
             log.debug("New event {} was added", event);
         }
-        if (operation.isSetFinish() || operation.isSetError()) {
-            ServiceEvent event = requestEventMap.get(requestId);
+
+        if (operationState.isSetFinish() || operationState.isSetError()) {
+            ServiceEvent event = serviceEventsMap.get(operation.getOperationId());
             if (event == null) {
-                log.warn("Start event with service id {} and request id {} not found");
+                log.warn("Event with service id {} and operation id {} not found",
+                        serviceId, operation.getOperationId());
                 return;
             }
-            if (operation.isSetFinish()) {
-                event.setEndTime(new Long(operation.getFinish().getTimeEnd()));
+            if (operationState.isSetFinish()) {
+                event.setEndTime(new Long(operationState.getFinish().getTimeEnd()));
             } else {
-                event.setEndTime(new Long(operation.getError().getTimeEnd()));
+                event.setEndTime(new Long(operationState.getError().getTimeEnd()));
                 event.setError(true);
             }
             log.debug("Event {} was updated", event);
         }
-        serviceEventMap.put(serviceId, requestEventMap);
-
-        log.debug("Registration operation {} for service id {} and request id {} finished",
-                operation, serviceId, requestId);
+        log.info("Registration operation {} for service {} finished", operation, serviceId);
     }
 
     @Override
-    public List<Availability> checkAvailability(List<String> services) throws TException {
-        log.debug("Check availability for the services {}", services);
-        List<Availability> availabilityResponse = new ArrayList<>();
+    public List<ServiceStatistics> getStatistics(List<String> services) throws TException {
+        log.debug("Check statictics for the services {}", services);
+        List<ServiceStatistics> serviceStatisticsList = new ArrayList<>();
 
         for (String serviceId : services) {
-            ServiceAvailability availability = availabilityMap.get(serviceId);
-            if (availability != null) {
-                Availability avail = new Availability();
-                avail.setServiceId(availability.getServiceId());
-                avail.setSuccessRate(availability.getSuccessRate());
-                avail.setTimeoutRate(availability.getTimeoutRate());
-                availabilityResponse.add(avail);
+            ServiceAggregates aggregates = aggregatesMap.get(serviceId);
+            if (aggregates != null) {
+                ServiceStatistics stat = new ServiceStatistics();
+                stat.setServiceId(aggregates.getServiceId());
+                stat.setFailureRate(aggregates.getFailureRate());
+                serviceStatisticsList.add(stat);
             }
         }
-        log.debug("Availability for services: {}", availabilityResponse);
-        return availabilityResponse;
-    }
-
-    @Override
-    public void setServiceStatistics(String serviceId, ServiceConfig serviceConfig) throws TException {
-        log.debug("Set service statistics for service id {}", serviceId);
-        ServiceAvailability availability = new ServiceAvailability();
-        double configValue = serviceConfig.getValue();
-        // TODO: вопрос правильности выставления параметров
-        // TODO: по факту необходимо настраивать параметры определения работоспособности сервиса,
-        //       а не финальный результат. Например, среднее время выполнения операции
-        switch (serviceConfig.getType()) {
-            case SUCCESS_RATE:
-                availability.setSuccessRate(configValue);
-                log.debug("Set success rate: {}", configValue);
-                break;
-            case TIMEOUT_RATE:
-                availability.setTimeoutRate(configValue);
-                log.debug("Set timeout rate: {}", configValue);
-                break;
-            case ALL:
-                availability.setTimeoutRate(configValue);
-                availability.setSuccessRate(configValue);
-                log.debug("Set all rates: {}", configValue);
-                break;
-        }
-        availabilityMap.put(serviceId, availability);
+        log.debug("Statistic for services: {}", serviceStatisticsList);
+        return serviceStatisticsList;
     }
 
 }

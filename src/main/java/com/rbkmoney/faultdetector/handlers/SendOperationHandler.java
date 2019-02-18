@@ -20,7 +20,7 @@ public class SendOperationHandler implements Handler<ServiceEvent> {
     public void handle(ServiceEvent serviceEvent) throws Exception {
         try {
             String topic = serviceEvent.getServiceId();
-            String key = serviceEvent.getRequestId();
+            String key = serviceEvent.getOperationId();
             ProducerRecord<String, ServiceEvent> producerRecord = new ProducerRecord<>(topic, key, serviceEvent);
             producer.send(producerRecord).get();
             producer.close();

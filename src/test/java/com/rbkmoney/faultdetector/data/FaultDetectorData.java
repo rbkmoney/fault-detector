@@ -1,33 +1,40 @@
 package com.rbkmoney.faultdetector.data;
 
+import com.rbkmoney.damsel.fault_detector.*;
 import com.rbkmoney.damsel.fault_detector.Error;
-import com.rbkmoney.damsel.fault_detector.Finish;
-import com.rbkmoney.damsel.fault_detector.Operation;
-import com.rbkmoney.damsel.fault_detector.Start;
 
 public final class FaultDetectorData {
 
-    public static Operation getStartOperation(String startTime) {
+    public static Operation getStartOperation(String operationId, String startTime) {
         Operation operation = new Operation();
         Start start = new Start();
         start.setTimeStart(startTime);
-        operation.setStart(start);
+        operation.setOperationId(operationId);
+        OperationState state = new OperationState();
+        state.setStart(start);
+        operation.setState(state);
         return operation;
     }
 
-    public static Operation getFinishOperation(String endTime) {
+    public static Operation getFinishOperation(String operationId, String endTime) {
         Operation operation = new Operation();
         Finish finish = new Finish();
         finish.setTimeEnd(endTime);
-        operation.setFinish(finish);
+        operation.setOperationId(operationId);
+        OperationState state = new OperationState();
+        state.setFinish(finish);
+        operation.setState(state);
         return operation;
     }
 
-    public static Operation getErrorOperation(String endTime) {
+    public static Operation getErrorOperation(String operationId, String endTime) {
         Operation operation = new Operation();
         Error error = new Error();
         error.setTimeEnd(endTime);
-        operation.setError(error);
+        operation.setOperationId(operationId);
+        OperationState state = new OperationState();
+        state.setError(error);
+        operation.setState(state);
         return operation;
     }
 

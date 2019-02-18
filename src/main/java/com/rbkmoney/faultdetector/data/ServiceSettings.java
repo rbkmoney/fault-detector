@@ -7,12 +7,14 @@ import lombok.Data;
  * корректировать для достижения наиболее корректных показателей
  */
 @Data
-public class Service {
+public class ServiceSettings {
 
-    private String serviceId;
+    private long operationLifetime;
 
-    private long eventErrorTimeout;
+    private long slidingWindow;
 
-    private int maxCountHoveringEvents;
+    private Short timeoutDelta;
+
+    private Long hoveringOperationErrorDelay;
 
 }

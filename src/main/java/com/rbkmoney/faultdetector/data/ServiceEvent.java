@@ -7,7 +7,7 @@ public class ServiceEvent {
 
     private String serviceId;
 
-    private String requestId;
+    private String operationId;
 
     private Long startTime;
 

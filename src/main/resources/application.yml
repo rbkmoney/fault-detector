@@ -15,6 +15,7 @@ operations:
   event-delay: 120000
   hovering-delay: 240000
   event-error-timeout: 30000
+  delta: 10
 
 kafka:
   servers: "localhost:29092"

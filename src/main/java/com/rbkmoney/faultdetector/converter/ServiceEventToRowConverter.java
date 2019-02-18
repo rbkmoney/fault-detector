@@ -12,7 +12,7 @@ public class ServiceEventToRowConverter implements Converter<ServiceEvent, Servi
     public ServiceEventRow convert(ServiceEvent serviceEvent) {
         ServiceEventRow serviceEventRow = new ServiceEventRow();
         serviceEventRow.setBucketName(serviceEvent.getServiceId());
-        serviceEventRow.setKey(serviceEvent.getRequestId());
+        serviceEventRow.setKey(serviceEvent.getOperationId());
         serviceEventRow.setValue(serviceEvent);
         return serviceEventRow;
     }

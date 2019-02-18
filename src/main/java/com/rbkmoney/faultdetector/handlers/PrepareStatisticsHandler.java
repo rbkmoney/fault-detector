@@ -1,83 +1,157 @@
 package com.rbkmoney.faultdetector.handlers;
 
-import com.rbkmoney.faultdetector.data.ServiceAvailability;
-import com.rbkmoney.faultdetector.data.ServiceEvent;
+import com.rbkmoney.faultdetector.data.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.LongSummaryStatistics;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class PrepareStatisticsHandler implements Handler<String> {
 
-    @Autowired
-    private Map<String, ServiceAvailability> availabilityMap;
+    private final Map<String, ServiceAggregates> serviceAggregatesMap;
 
-    @Autowired
-    private Map<String, Map<String, ServiceEvent>> serviceEventMap;
-    // TODO: для каждого сервиса должна быть возможность перезадать этот параметр, т.к.
-    //       время выполнения операции может существенно отличаться
-    @Value("${operations.event-error-timeout}")
-    private long eventErrorTimeout;
+    private final Map<String, Map<String, ServiceEvent>> serviceEventMap;
+
+    private final Map<String, ServiceSettings> serviceConfigMap;
+
+    @Value("${operations.lifetime}")
+    private long lifetime;
+
+    @Value("${operations.delta}")
+    private int delta;
 
     @Override
-    public void handle(String serviceId) {
+    public void handle(String serviceId) throws Exception {
         log.debug("Start processing the service statistics for service {}", serviceId);
-        ServiceAvailability availability = new ServiceAvailability();
-        availability.setServiceId(serviceId);
+
+        ServiceSettings serviceSettings = serviceConfigMap.get(serviceId);
+        if (serviceSettings == null) {
+            throw new Exception("Config for service " + serviceId + " not found");
+        }
         Collection<ServiceEvent> events = serviceEventMap.get(serviceId).values();
         log.debug("Total count of events for service {}: {}", serviceId, events.size());
-        double successRate = prepareSuccessRate(events);
-        log.debug("Success rate for service {}: {}", serviceId, successRate);
-        availability.setSuccessRate(successRate);
-        double timeoutRate = prepareTimeoutRate(events);
-        log.debug("Timeout rate for service {}: {}", serviceId, timeoutRate);
-        availability.setTimeoutRate(timeoutRate);
-        availabilityMap.put(serviceId, availability);
+
+        ServiceAggregates serviceAggregates = prepareFailureRate(serviceId, events, serviceSettings);
+        serviceAggregatesMap.put(serviceId, serviceAggregates);
         log.debug("Processing the service statistics for service {} was finished", serviceId);
     }
 
-    private double prepareSuccessRate(Collection<ServiceEvent> events) {
+    private ServiceAggregates prepareFailureRate(String serviceId,
+                                                 Collection<ServiceEvent> serviceEvents,
+                                                 ServiceSettings serviceSettings) {
+        double operationTimeout = getOperationTimeout(serviceSettings, serviceEvents);
+
         long currentTime = System.currentTimeMillis();
+        long slidingWindow = serviceSettings.getSlidingWindow();
+        double remainingTime = slidingWindow - operationTimeout;
+        List<ProcessedServiceEvent> processedServiceEventList = new ArrayList<>();
 
-        List<ServiceEvent> errorServiceEvents = events.stream()
-                .filter(event -> event.isError() || (currentTime - event.getStartTime()) > eventErrorTimeout)
-                .collect(Collectors.toList());
+        for (ServiceEvent serviceEvent : serviceEvents) {
 
-        int totalEventCount = events.size();
-        int errorEventCount = errorServiceEvents.size();
-        // TODO: существует три типа операций: активные, завершенные и сбойные. Сейчас активные транзакции
-        //       разделяются на группы согласно таймауту на операцию для сервиса. Возможно формула расчета
-        //       должна быть немного иной. Например, по истечении определенного времени "вес" такой операции
-        //       в общем результате уменьшается. Затем в зависимости от количества таких операций они или
-        //       исключаются из статистики по сервису, либо остаются на все интересующее время
-        return (double) (totalEventCount - errorEventCount)/totalEventCount;
+            long endTime = serviceEvent.getEndTime() == null ? currentTime : serviceEvent.getEndTime();
+            long currentOperationTimeout = endTime - serviceEvent.getStartTime();
+
+            if (serviceEvent.isError()) {
+                ProcessedServiceEvent processErrorEvent =
+                        processErrorEvent(operationTimeout, currentOperationTimeout, remainingTime);
+                processedServiceEventList.add(processErrorEvent);
+            } else if (currentOperationTimeout > operationTimeout) {
+                double overrunTime = currentOperationTimeout - operationTimeout;
+                ProcessedServiceEvent processedServiceEvent =
+                        processTimeoutEvent(serviceEvent, overrunTime, remainingTime, slidingWindow, currentTime);
+                processedServiceEventList.add(processedServiceEvent);
+            }
+        }
+
+        double failWeightSum = getServiceEventsWeightSum(processedServiceEventList);
+        double failRate = failWeightSum / serviceEvents.size();
+
+        return fillServiceAggregates(serviceId, serviceEvents, processedServiceEventList, failRate);
     }
 
-    private double prepareTimeoutRate(Collection<ServiceEvent> events) {
+    private ServiceAggregates fillServiceAggregates(String serviceId,
+                                                    Collection<ServiceEvent> serviceEvents,
+                                                    List<ProcessedServiceEvent> processedServiceEventList,
+                                                    double failRate) {
+        ServiceAggregates aggregates = new ServiceAggregates();
+        aggregates.setServiceId(serviceId);
+        aggregates.setOperationsCount(serviceEvents.size());
+        aggregates.setErrorOperationsCount(getServiceEventListSize(processedServiceEventList, EventType.FAIL));
+        aggregates.setOvertimeOperationsCount(getServiceEventListSize(processedServiceEventList, EventType.OVERTIME));
+        aggregates.setHoveringOpertionsCount(getServiceEventListSize(processedServiceEventList, EventType.HOVERING));
+        aggregates.setFailureRate(failRate);
+        return aggregates;
+    }
 
-        LongSummaryStatistics timeStatistics = events.stream()
-                .filter(event -> event.getEndTime() != null && !event.isError())
-                .collect(Collectors.summarizingLong(event -> event.getEndTime() - event.getStartTime()));
+    private ProcessedServiceEvent processErrorEvent(double operationTimeout,
+                                                    long currentOperationTimeout,
+                                                    double remainingTime) {
+        ProcessedServiceEvent processedServiceEvent = new ProcessedServiceEvent();
+        double eventWeight;
+        if (currentOperationTimeout > operationTimeout) {
+            double overrunTime = currentOperationTimeout - operationTimeout;
+            eventWeight = 1 - overrunTime / remainingTime;
+        } else {
+            eventWeight = 1;
+        }
+        processedServiceEvent.setWeight(eventWeight);
+        processedServiceEvent.setEventType(EventType.FAIL);
+        return processedServiceEvent;
+    }
 
-        double timeoutAvg = timeStatistics.getAverage();
+    private ProcessedServiceEvent processTimeoutEvent(ServiceEvent serviceEvent,
+                                                      double overrunTime,
+                                                      double remainingTime,
+                                                      long slidingWindow,
+                                                      long currentTime) {
+        ProcessedServiceEvent processedServiceEvent = new ProcessedServiceEvent();
+        if (serviceEvent.getEndTime() == null) {
+            // Рассчет веса для операции, которая превысила время выполнения и еще выполняется
+            double eventWeight = overrunTime / remainingTime;
+            processedServiceEvent.setWeight(eventWeight);
+            processedServiceEvent.setEventType(EventType.HOVERING);
+        } else {
+            // Рассчет веса для успешной операции, которая превысила лимит
+            long remainingLifetime = slidingWindow - (currentTime - serviceEvent.getStartTime());
+            double eventWeight = (overrunTime / remainingTime) * (1 - remainingLifetime / slidingWindow);
+            processedServiceEvent.setWeight(eventWeight);
+            processedServiceEvent.setEventType(EventType.OVERTIME);
+        }
+        return processedServiceEvent;
+    }
 
-        List<ServiceEvent> timeoutErrorEvents = events.stream()
-                .filter(event -> event.getEndTime() != null &&
-                        (event.getEndTime() - event.getStartTime() > timeoutAvg))
-                .collect(Collectors.toList());
+    private double getOperationTimeout(ServiceSettings serviceSettings,
+                                       Collection<ServiceEvent> serviceEvents) {
+        if (serviceSettings.getHoveringOperationErrorDelay() == null) {
+            LongSummaryStatistics timeStatistics = serviceEvents.stream()
+                    .filter(event -> event.getEndTime() != null && !event.isError())
+                    .collect(Collectors.summarizingLong(event -> event.getEndTime() - event.getStartTime()));
+            double deltaValue = delta / 100;
+            return timeStatistics.getAverage() + timeStatistics.getAverage() * deltaValue;
+        } else {
+            return serviceSettings.getHoveringOperationErrorDelay();
+        }
+    }
 
-        int totalEventCount = events.size();
-        int timeoutErrorCount = timeoutErrorEvents.size();
+    private long getServiceEventListSize(List<ProcessedServiceEvent> serviceEventList, EventType type) {
+         return serviceEventList.stream()
+                 .filter(event -> event.getEventType() == type)
+                 .count();
+    }
 
-        return (double) (totalEventCount - timeoutErrorCount)/timeoutErrorCount;
+    private double getServiceEventsWeightSum(List<ProcessedServiceEvent> processedServiceEventList) {
+        DoubleSummaryStatistics summaryStatistics = processedServiceEventList.stream()
+                .map(event -> event.getWeight())
+                .collect(Collectors.summarizingDouble(Double::doubleValue));
+
+        return summaryStatistics.getSum();
     }
 
 }
