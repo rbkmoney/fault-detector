@@ -9,9 +9,9 @@ public class ServiceEvent {
 
     private String operationId;
 
-    private Long startTime;
+    private long startTime;
 
-    private Long endTime;
+    private long endTime;
 
     private boolean error;
 

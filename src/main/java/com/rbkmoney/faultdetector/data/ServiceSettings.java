@@ -9,12 +9,10 @@ import lombok.Data;
 @Data
 public class ServiceSettings {
 
-    private long operationLifetime;
+    private long operationTimeLimit;
 
     private long slidingWindow;
 
-    private Short timeoutDelta;
-
-    private Long hoveringOperationErrorDelay;
+    private int preAggregationSize;
 
 }

@@ -11,6 +11,8 @@ public class ServiceAggregates {
 
     private long operationsCount;
 
+    private long successOperationsCount;
+
     private long errorOperationsCount;
 
     private long overtimeOperationsCount;

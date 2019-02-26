@@ -7,10 +7,9 @@ public final class SettingsUtils {
 
     public static ServiceSettings getServiceSettings(ServiceConfig serviceConfig) {
         ServiceSettings serviceSettings = new ServiceSettings();
-        serviceSettings.setOperationLifetime(serviceConfig.getOperationLifetime());
+        serviceSettings.setOperationTimeLimit(serviceConfig.getOperationTimeLimit());
         serviceSettings.setSlidingWindow(serviceConfig.getSlidingWindow());
-        serviceSettings.setTimeoutDelta(serviceConfig.getTimeoutDelta());
-        serviceSettings.setHoveringOperationErrorDelay(serviceConfig.getHoveringOperationErrorDelay());
+        serviceSettings.setPreAggregationSize(serviceConfig.getPreAggregationSize());
         return serviceSettings;
     }
 

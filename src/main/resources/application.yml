@@ -2,7 +2,7 @@ server:
   port: @server.port@
 spring:
   application:
-    name: @project.name@
+    name: fd
 info:
   version: @project.version@
   stage: dev
@@ -11,19 +11,19 @@ preparing:
   delay: 5000
 
 operations:
-  lifetime: 60000
-  event-delay: 120000
-  hovering-delay: 240000
-  event-error-timeout: 30000
-  delta: 10
+  aggregation-delay: 5000
+  pre-aggregation-period: 5000
+  revision: 60000
 
 kafka:
-  servers: "localhost:29092"
+  bootstrap:
+    servers: "localhost:9092"
   topic: "fault-detector"
   client.id: "fault-detector"
   group.id: "fault-detector"
   fault-detector:
     group.id: "fault-detector"
+  poll.timeout: 5000
 
 management:
   security:

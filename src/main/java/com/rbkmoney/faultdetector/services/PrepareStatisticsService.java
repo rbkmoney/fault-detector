@@ -16,13 +16,13 @@ public class PrepareStatisticsService {
 
     private final Map<String, Map<String, ServiceEvent>> serviceEventMap;
 
-    private final Handler prepareStatisticsHandler;
+    private final Handler<String> calculateAggregatesHandler;
 
     @Scheduled(fixedDelayString = "${preparing.delay}")
     public void prepare() throws Exception {
         log.debug("Start processing the services statistics");
         for (String serviceId : serviceEventMap.keySet()) {
-            prepareStatisticsHandler.handle(serviceId);
+            calculateAggregatesHandler.handle(serviceId);
         }
         log.debug("Processing the services statistics was finished");
     }

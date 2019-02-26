@@ -4,11 +4,14 @@ import com.rbkmoney.damsel.fault_detector.*;
 import com.rbkmoney.faultdetector.data.ServiceAggregates;
 import com.rbkmoney.faultdetector.data.ServiceEvent;
 import com.rbkmoney.faultdetector.data.ServiceSettings;
+import com.rbkmoney.faultdetector.handlers.Handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,6 +27,10 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
     private final Map<String, Map<String, ServiceEvent>> serviceMap;
 
     private final Map<String, ServiceSettings> serviceConfigMap;
+
+    private final Handler<ServiceEvent> sendOperationHandler;
+
+    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
 
     @Override
     public void initService(String serviceId, ServiceConfig serviceConfig) throws TException {
@@ -48,34 +55,35 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
         }
         setServiceSettings(serviceId, serviceConfig);
 
-        Map<String, ServiceEvent> serviceEventsMap = serviceMap.get(serviceId);
+        try {
+            sendOperationHandler.handle(transformOperation(serviceId, operation));
+            log.info("Registration operation {} for service {} finished", operation, serviceId);
+        } catch (Exception e) {
+            log.error("Error sending data", e);
+        }
+    }
 
+    private ServiceEvent transformOperation(String serviceId, Operation operation) throws ParseException {
+        ServiceEvent serviceEvent = new ServiceEvent();
+        serviceEvent.setServiceId(serviceId);
+        serviceEvent.setOperationId(operation.getOperationId());
         OperationState operationState = operation.getState();
         if (operationState.isSetStart()) {
-            ServiceEvent event = new ServiceEvent();
-            String operationId = operation.getOperationId();
-            event.setOperationId(operationId);
-            event.setStartTime(new Long(operationState.getStart().getTimeStart()));
-            serviceEventsMap.put(operationId, event);
-            log.debug("New event {} was added", event);
+            serviceEvent.setStartTime(getTime(operationState.getStart().getTimeStart()));
+            serviceEvent.setEndTime(-1L);
         }
+        if (operationState.isSetFinish()) {
+            serviceEvent.setEndTime(getTime(operationState.getFinish().getTimeEnd()));
+        }
+        if (operationState.isSetError()) {
+            serviceEvent.setEndTime(getTime(operationState.getError().getTimeEnd()));
+            serviceEvent.setError(true);
+        }
+        return serviceEvent;
+    }
 
-        if (operationState.isSetFinish() || operationState.isSetError()) {
-            ServiceEvent event = serviceEventsMap.get(operation.getOperationId());
-            if (event == null) {
-                log.warn("Event with service id {} and operation id {} not found",
-                        serviceId, operation.getOperationId());
-                return;
-            }
-            if (operationState.isSetFinish()) {
-                event.setEndTime(new Long(operationState.getFinish().getTimeEnd()));
-            } else {
-                event.setEndTime(new Long(operationState.getError().getTimeEnd()));
-                event.setError(true);
-            }
-            log.debug("Event {} was updated", event);
-        }
-        log.info("Registration operation {} for service {} finished", operation, serviceId);
+    private long getTime(String dateString) throws ParseException {
+        return simpleDateFormat.parse(dateString).getTime();
     }
 
     @Override
@@ -89,6 +97,9 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
                 ServiceStatistics stat = new ServiceStatistics();
                 stat.setServiceId(aggregates.getServiceId());
                 stat.setFailureRate(aggregates.getFailureRate());
+                stat.setOperationsCount(aggregates.getOperationsCount());
+                stat.setErrorOperationsCount(aggregates.getErrorOperationsCount());
+                stat.setSuccessOperationsCount(aggregates.getSuccessOperationsCount());
                 serviceStatisticsList.add(stat);
             }
         }
