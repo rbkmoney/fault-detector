@@ -1,7 +1,7 @@
 package com.rbkmoney.faultdetector.config;
 
 import com.rbkmoney.faultdetector.data.ServiceAggregates;
-import com.rbkmoney.faultdetector.data.ServiceEvent;
+import com.rbkmoney.faultdetector.data.ServiceOperation;
 import com.rbkmoney.faultdetector.data.ServicePreAggregates;
 import com.rbkmoney.faultdetector.data.ServiceSettings;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +15,7 @@ public class AppConfig {
 
     private final Map<String, ServiceAggregates> aggregatesMap = new ConcurrentHashMap<>();
 
-    private final Map<String, Map<String, ServiceEvent>> serviceMap = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, ServiceOperation>> serviceMap = new ConcurrentHashMap<>();
 
     private final Map<String, ServiceSettings> serviceSettingsMap = new ConcurrentHashMap<>();
 
@@ -27,7 +27,7 @@ public class AppConfig {
     }
 
     @Bean
-    public Map<String, Map<String, ServiceEvent>> servicesMap() {
+    public Map<String, Map<String, ServiceOperation>> servicesMap() {
         return serviceMap;
     }
 

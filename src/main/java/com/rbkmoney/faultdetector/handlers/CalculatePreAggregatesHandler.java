@@ -1,11 +1,10 @@
 package com.rbkmoney.faultdetector.handlers;
 
-import com.rbkmoney.faultdetector.data.ServiceEvent;
+import com.rbkmoney.faultdetector.data.ServiceOperation;
 import com.rbkmoney.faultdetector.data.ServicePreAggregates;
 import com.rbkmoney.faultdetector.data.ServiceSettings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -16,19 +15,16 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class CalculatePreAggregatesHandler implements Handler<String> {
 
-    private final Map<String, Map<String, ServiceEvent>> serviceMap;
+    private final Map<String, Map<String, ServiceOperation>> serviceMap;
 
     private final Map<String, Map<Long, ServicePreAggregates>> servicePreAggregatesMap;
 
     private final Map<String, ServiceSettings> serviceSettingsMap;
 
-    @Value("${operations.pre-aggregation-period}")
-    private int preAggregationPeriod;
-
     @Override
     public void handle(String serviceId) throws Exception {
-        Map<String, ServiceEvent> serviceEventMap = serviceMap.get(serviceId);
-        if (serviceEventMap == null || serviceEventMap.isEmpty()) {
+        Map<String, ServiceOperation> serviceOperationMap = serviceMap.get(serviceId);
+        if (serviceOperationMap == null || serviceOperationMap.isEmpty()) {
             return;
         }
 
@@ -42,25 +38,25 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
         ServicePreAggregates preAggregates = new ServicePreAggregates();
         preAggregates.setServiceId(serviceId);
         preAggregates.setAggregationTime(currentTimeMillis);
-        preAggregates.setOperationsCount(serviceEventMap.size());
+        preAggregates.setOperationsCount(serviceOperationMap.size());
 
         ServiceSettings serviceSettings = serviceSettingsMap.get(serviceId);
-        for (ServiceEvent serviceEvent : serviceEventMap.values()) {
-            prepareEvent(serviceEvent, preAggregates, serviceSettings, serviceEventMap, currentTimeMillis);
+        for (ServiceOperation serviceOperation : serviceOperationMap.values()) {
+            prepareOperation(serviceOperation, preAggregates, serviceSettings, serviceOperationMap, currentTimeMillis);
         }
 
         preAggregatesMap.put(currentTimeMillis, preAggregates);
         servicePreAggregatesMap.put(serviceId, preAggregatesMap);
     }
 
-    private void prepareEvent(ServiceEvent serviceEvent,
-                              ServicePreAggregates preAggregates,
-                              ServiceSettings serviceSettings,
-                              Map<String, ServiceEvent> serviceEventMap,
-                              long currentTimeMillis) {
-        if (serviceEvent.getEndTime() > 0) {
-            long operExecTime = serviceEvent.getEndTime() - serviceEvent.getStartTime();
-            if (serviceEvent.isError()) {
+    private void prepareOperation(ServiceOperation serviceOperation,
+                                  ServicePreAggregates preAggregates,
+                                  ServiceSettings serviceSettings,
+                                  Map<String, ServiceOperation> serviceOperationMap,
+                                  long currentTimeMillis) {
+        if (serviceOperation.getEndTime() > 0) {
+            long operExecTime = serviceOperation.getEndTime() - serviceOperation.getStartTime();
+            if (serviceOperation.isError()) {
                 // Добавляем сбойную операцию в преагрегат и удаляем из списка операций
                 int errorOperationsCount = preAggregates.getErrorOperationsCount() + 1;
                 preAggregates.setErrorOperationsCount(errorOperationsCount);
@@ -74,9 +70,9 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
                 int successOperationsCount = preAggregates.getSuccessOperationsCount() + 1;
                 preAggregates.setSuccessOperationsCount(successOperationsCount);
             }
-            serviceEventMap.remove(serviceEvent.getOperationId());
+            serviceOperationMap.remove(serviceOperation.getOperationId());
         } else {
-            long operExecTime = currentTimeMillis - serviceEvent.getStartTime();
+            long operExecTime = currentTimeMillis - serviceOperation.getStartTime();
             if (operExecTime > serviceSettings.getOperationTimeLimit()) {
                 // Зависшая операция должна учитываться как сбойная, но не удаляться из
                 // общего списка, чтобы было понимание сколько операций "висит"

@@ -1,6 +1,6 @@
 package com.rbkmoney.faultdetector.integration;
 
-import com.rbkmoney.faultdetector.data.ServiceEvent;
+import com.rbkmoney.faultdetector.data.ServiceOperation;
 import com.rbkmoney.faultdetector.data.ServiceSettings;
 import com.rbkmoney.faultdetector.handlers.Handler;
 import org.junit.Test;
@@ -14,10 +14,10 @@ import static org.junit.Assert.assertEquals;
 public class KafkaIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
-    private Handler<ServiceEvent> SendOperationHandler;
+    private Handler<ServiceOperation> SendOperationHandler;
 
     @Autowired
-    private Map<String, Map<String, ServiceEvent>> serviceMap;
+    private Map<String, Map<String, ServiceOperation>> serviceMap;
 
     @Autowired
     private Map<String, ServiceSettings> serviceSettingsMap;
@@ -40,24 +40,24 @@ public class KafkaIntegrationTest extends AbstractIntegrationTest {
         assertEquals("Count of operations not equal to expected", 2, serviceMap.size());
     }
 
-    private ServiceEvent getStartServiceEvent(String serviceId, String operationId) {
-        ServiceEvent event = new ServiceEvent();
+    private ServiceOperation getStartServiceEvent(String serviceId, String operationId) {
+        ServiceOperation event = new ServiceOperation();
         event.setServiceId(serviceId);
         event.setOperationId(operationId);
         event.setStartTime(System.currentTimeMillis());
         return event;
     }
 
-    private ServiceEvent getFinishServiceEvent(String serviceId, String operationId) {
+    private ServiceOperation getFinishServiceEvent(String serviceId, String operationId) {
         return getEndlessServiceEvent(serviceId, operationId, false);
     }
 
-    private ServiceEvent getErrorServiceEvent(String serviceId, String operationId) {
+    private ServiceOperation getErrorServiceEvent(String serviceId, String operationId) {
         return getEndlessServiceEvent(serviceId, operationId, true);
     }
 
-    private ServiceEvent getEndlessServiceEvent(String serviceId, String operationId, boolean isError) {
-        ServiceEvent event = new ServiceEvent();
+    private ServiceOperation getEndlessServiceEvent(String serviceId, String operationId, boolean isError) {
+        ServiceOperation event = new ServiceOperation();
         event.setServiceId(serviceId);
         event.setOperationId(operationId);
         event.setEndTime(System.currentTimeMillis());

@@ -1,8 +1,8 @@
 package com.rbkmoney.faultdetector.config;
 
-import com.rbkmoney.faultdetector.data.ServiceEvent;
-import com.rbkmoney.faultdetector.serializer.ServiceEventDeserializer;
-import com.rbkmoney.faultdetector.serializer.ServiceEventSerializer;
+import com.rbkmoney.faultdetector.data.ServiceOperation;
+import com.rbkmoney.faultdetector.serializer.ServiceOperationDeserializer;
+import com.rbkmoney.faultdetector.serializer.ServiceOperationSerializer;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -41,13 +41,13 @@ public class KafkaConfig {
     private String pollTimeout;
 
     @Bean
-    public Producer<String, ServiceEvent> kafkaProducer() {
+    public Producer<String, ServiceOperation> kafkaProducer() {
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
         props.put(ProducerConfig.CLIENT_ID_CONFIG, clientId);
         props.put(ProducerConfig.ACKS_CONFIG, "all");
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ServiceEventSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ServiceOperationSerializer.class);
         return new KafkaProducer<>(props);
     }
 
@@ -59,41 +59,39 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ProducerFactory<String, ServiceEvent> producerFactory() {
+    public ProducerFactory<String, ServiceOperation> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ServiceEventSerializer.class);
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ServiceOperationSerializer.class);
 
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
     @Bean
-    public KafkaTemplate<String, ServiceEvent> kafkaTemplate() {
+    public KafkaTemplate<String, ServiceOperation> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 
     @Bean
-    public ConsumerFactory<String, ServiceEvent> serviceEventConsumerFactory() {
+    public ConsumerFactory<String, ServiceOperation> serviceOperationConsumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ServiceEventDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ServiceOperationDeserializer.class);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, EARLIEST);
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ServiceEvent> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, ServiceEvent> factory
+    public ConcurrentKafkaListenerContainerFactory<String, ServiceOperation> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, ServiceOperation> factory
                 = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(serviceEventConsumerFactory());
+        factory.setConsumerFactory(serviceOperationConsumerFactory());
         factory.setConcurrency(1);
         factory.setBatchListener(true);
         factory.getContainerProperties().setPollTimeout(5000);
-        //factory.getContainerProperties().setSyncCommits();
-        //factory.getContainerProperties().setAckMode(AbstractMessageListenerContainer.);
         return factory;
     }
 

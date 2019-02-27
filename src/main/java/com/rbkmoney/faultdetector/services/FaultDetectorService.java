@@ -2,7 +2,7 @@ package com.rbkmoney.faultdetector.services;
 
 import com.rbkmoney.damsel.fault_detector.*;
 import com.rbkmoney.faultdetector.data.ServiceAggregates;
-import com.rbkmoney.faultdetector.data.ServiceEvent;
+import com.rbkmoney.faultdetector.data.ServiceOperation;
 import com.rbkmoney.faultdetector.data.ServiceSettings;
 import com.rbkmoney.faultdetector.handlers.Handler;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +24,11 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
 
     private final Map<String, ServiceAggregates> aggregatesMap;
 
-    private final Map<String, Map<String, ServiceEvent>> serviceMap;
+    private final Map<String, Map<String, ServiceOperation>> serviceMap;
 
     private final Map<String, ServiceSettings> serviceConfigMap;
 
-    private final Handler<ServiceEvent> sendOperationHandler;
+    private final Handler<ServiceOperation> sendOperationHandler;
 
     private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
 
@@ -63,23 +63,23 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
         }
     }
 
-    private ServiceEvent transformOperation(String serviceId, Operation operation) throws ParseException {
-        ServiceEvent serviceEvent = new ServiceEvent();
-        serviceEvent.setServiceId(serviceId);
-        serviceEvent.setOperationId(operation.getOperationId());
+    private ServiceOperation transformOperation(String serviceId, Operation operation) throws ParseException {
+        ServiceOperation serviceOperation = new ServiceOperation();
+        serviceOperation.setServiceId(serviceId);
+        serviceOperation.setOperationId(operation.getOperationId());
         OperationState operationState = operation.getState();
         if (operationState.isSetStart()) {
-            serviceEvent.setStartTime(getTime(operationState.getStart().getTimeStart()));
-            serviceEvent.setEndTime(-1L);
+            serviceOperation.setStartTime(getTime(operationState.getStart().getTimeStart()));
+            serviceOperation.setEndTime(-1L);
         }
         if (operationState.isSetFinish()) {
-            serviceEvent.setEndTime(getTime(operationState.getFinish().getTimeEnd()));
+            serviceOperation.setEndTime(getTime(operationState.getFinish().getTimeEnd()));
         }
         if (operationState.isSetError()) {
-            serviceEvent.setEndTime(getTime(operationState.getError().getTimeEnd()));
-            serviceEvent.setError(true);
+            serviceOperation.setEndTime(getTime(operationState.getError().getTimeEnd()));
+            serviceOperation.setError(true);
         }
-        return serviceEvent;
+        return serviceOperation;
     }
 
     private long getTime(String dateString) throws ParseException {

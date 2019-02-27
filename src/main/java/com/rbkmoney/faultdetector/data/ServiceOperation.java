@@ -3,7 +3,7 @@ package com.rbkmoney.faultdetector.data;
 import lombok.Data;
 
 @Data
-public class ServiceEvent {
+public class ServiceOperation {
 
     private String serviceId;
 

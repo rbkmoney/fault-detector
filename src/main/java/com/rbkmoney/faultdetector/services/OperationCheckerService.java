@@ -1,6 +1,6 @@
 package com.rbkmoney.faultdetector.services;
 
-import com.rbkmoney.faultdetector.data.ServiceEvent;
+import com.rbkmoney.faultdetector.data.ServiceOperation;
 import com.rbkmoney.faultdetector.data.ServicePreAggregates;
 import com.rbkmoney.faultdetector.data.ServiceSettings;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class OperationCheckerService {
 
     private final Map<String, Map<Long, ServicePreAggregates>> servicePreAggregatesMap;
 
-    private final Map<String, Map<String, ServiceEvent>> serviceMap;
+    private final Map<String, Map<String, ServiceOperation>> serviceMap;
 
     @Scheduled(fixedDelayString = "${operations.revision}")
     void process() {
@@ -40,10 +40,10 @@ public class OperationCheckerService {
         // TODO: во время агрегации удалить зависшие операции
         for (String serviceId : serviceMap.keySet()) {
             ServiceSettings settings = serviceSettingsMap.get(serviceId);
-            Map<String, ServiceEvent> serviceEventMap = serviceMap.get(serviceId);
-            for (ServiceEvent event : serviceEventMap.values()) {
-                if (currentTimeMillis - event.getStartTime() > settings.getSlidingWindow()) {
-                    serviceEventMap.remove(event.getOperationId());
+            Map<String, ServiceOperation> serviceOperationMap = serviceMap.get(serviceId);
+            for (ServiceOperation operation : serviceOperationMap.values()) {
+                if (currentTimeMillis - operation.getStartTime() > settings.getSlidingWindow()) {
+                    serviceOperationMap.remove(operation.getOperationId());
                 }
             }
         }

@@ -45,7 +45,14 @@ public class CalculateAggregatesHandler implements Handler<String> {
         }
 
         double failureRate = failureRateSum / weightSum;
+        ServiceAggregates serviceAggregates = getServiceAggregates(serviceId, failureRate, preAggregatesMap);
+        serviceAggregatesMap.put(serviceId, serviceAggregates);
+        log.debug("Processing the service statistics for service {} was finished", serviceId);
+    }
 
+    private ServiceAggregates getServiceAggregates(String serviceId,
+                                                   double failureRate,
+                                                   Map<Long, ServicePreAggregates> preAggregatesMap) {
         ServiceAggregates serviceAggregates = new ServiceAggregates();
         serviceAggregates.setServiceId(serviceId);
         serviceAggregates.setFailureRate(failureRate);
@@ -65,9 +72,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
                 .orElse(null);
         serviceAggregates.setOperationsCount(lastPreAggregates.getRunningOperationsCount() +
                 lastPreAggregates.getOvertimeOperationsCount() + totalSuccessOpers + totalErrorOpers);
-
-        serviceAggregatesMap.put(serviceId, serviceAggregates);
-        log.debug("Processing the service statistics for service {} was finished", serviceId);
+        return serviceAggregates;
     }
 
 }
