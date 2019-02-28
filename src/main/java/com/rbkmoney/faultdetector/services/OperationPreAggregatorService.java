@@ -12,7 +12,7 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class OperationAggregatorService {
+public class OperationPreAggregatorService {
 
     private final Map<String, Map<String, ServiceOperation>> serviceMap;
 

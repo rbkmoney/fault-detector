@@ -1,13 +1,16 @@
 package com.rbkmoney.faultdetector.listeners;
 
 import com.rbkmoney.faultdetector.data.ServiceOperation;
+import com.rbkmoney.faultdetector.handlers.Handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -21,8 +24,10 @@ public class OperationListener {
     public void listen(List<ServiceOperation> serviceOperations) {
         log.debug("Number of operations received from topic: {}", serviceOperations.size());
 
+        Set<String> services = new HashSet<>();
         for (ServiceOperation serviceOperation : serviceOperations) {
             String serviceId = serviceOperation.getServiceId();
+            services.add(serviceId);
             String operationId = serviceOperation.getOperationId();
             Map<String, ServiceOperation> operationsMap;
             if (serviceMap.get(serviceId) == null) {
@@ -46,9 +51,9 @@ public class OperationListener {
             }
         }
 
+        // TODO: возможно стоит пересчитывать преагрегаты сразу после обновления мапы с операциями
+
         log.debug("{} operations were obtained", serviceOperations.size());
     }
-
-    // TODO: может имеет смысл перекидывать в топик незавершенные операции
 
 }
