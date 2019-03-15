@@ -9,9 +9,10 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static com.rbkmoney.faultdetector.data.FaultDetectorData.getStartOperation;
@@ -23,7 +24,7 @@ public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private FaultDetectorService faultDetectorService;
 
-    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     @Test
     public void serviceTest() throws TException, ParseException, InterruptedException {
@@ -70,7 +71,7 @@ public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
         for (int i = 1; i <= operationsCount; i++) {
             long operStartTime = startTimeMills + delta / i;
             String operationId = "oper_id_" + i;
-            String startTime = simpleDateFormat.format(new Date(operStartTime));
+            String startTime = formatter.format(LocalDateTime.ofEpochSecond(operStartTime, 0, ZoneOffset.UTC));
             Operation startOperation = getStartOperation(operationId, startTime);
             faultDetectorService.registerOperation(serviceId, startOperation, serviceConfig);
             operations.add(startOperation);
@@ -118,8 +119,9 @@ public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
         Operation startOperation = initOperations.get(currentOperationNumber);
         Operation finishOperation = new Operation();
         finishOperation.setOperationId(startOperation.getOperationId());
-        long timeStart = simpleDateFormat.parse(startOperation.getState().getStart().getTimeStart()).getTime();
-        String finishOperationTime = simpleDateFormat.format(new Date(timeStart + executionTime));
+        long timeStart = LocalDateTime.parse(startOperation.getState().getStart().getTimeStart(), formatter).toEpochSecond(ZoneOffset.UTC);
+        String finishOperationTime =
+                formatter.format(LocalDateTime.ofEpochSecond(timeStart + executionTime, 0, ZoneOffset.UTC));
         if (isError) {
             Error error = new Error();
             error.setTimeEnd(finishOperationTime);

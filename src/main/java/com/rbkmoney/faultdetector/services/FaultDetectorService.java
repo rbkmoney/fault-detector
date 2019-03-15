@@ -11,9 +11,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static com.rbkmoney.faultdetector.utils.SettingsMappingUtils.getServiceSettings;
 
@@ -30,7 +33,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
 
     private final ServiceOperations serviceOperations;
 
-    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     @Override
     public void initService(String serviceId, ServiceConfig serviceConfig) throws TException {
@@ -64,7 +67,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
         }
     }
 
-    private ServiceOperation transformOperation(String serviceId, Operation operation) throws ParseException {
+    private ServiceOperation transformOperation(String serviceId, Operation operation) {
         ServiceOperation serviceOperation = new ServiceOperation();
         serviceOperation.setServiceId(serviceId);
         serviceOperation.setOperationId(operation.getOperationId());
@@ -83,8 +86,8 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
         return serviceOperation;
     }
 
-    private long getTime(String dateString) throws ParseException {
-        return simpleDateFormat.parse(dateString).getTime();
+    private long getTime(String dateString) {
+        return LocalDateTime.parse(dateString, formatter).toEpochSecond(ZoneOffset.UTC);
     }
 
     @Override
