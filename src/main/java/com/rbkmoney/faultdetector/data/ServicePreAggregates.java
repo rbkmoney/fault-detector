@@ -1,22 +1,31 @@
 package com.rbkmoney.faultdetector.data;
 
-import lombok.Data;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
-@Data
 public class ServicePreAggregates {
 
-    private String serviceId;
+    private final Map<String, Set<PreAggregates>> servicePreAggregatesMap = new ConcurrentHashMap<>();
 
-    private Long aggregationTime;
+    public void addPreAggregates(String serviceId, PreAggregates preAggregates) {
+        Set<PreAggregates> preAggregatesSet;
+        if (servicePreAggregatesMap.containsKey(serviceId)) {
+            preAggregatesSet = servicePreAggregatesMap.get(serviceId);
+        } else {
+            preAggregatesSet = new ConcurrentSkipListSet();
+        }
+        preAggregatesSet.add(preAggregates);
+        servicePreAggregatesMap.put(serviceId, preAggregatesSet);
+    }
 
-    private int operationsCount;
+    public Set<PreAggregates> getPreAggregatesSet(String serviceId) {
+        return servicePreAggregatesMap.get(serviceId);
+    }
 
-    private int runningOperationsCount;
-
-    private int overtimeOperationsCount;
-
-    private int errorOperationsCount;
-
-    private int successOperationsCount;
+    public Set<String> getServices() {
+        return servicePreAggregatesMap.keySet();
+    }
 
 }

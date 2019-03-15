@@ -3,7 +3,6 @@ package com.rbkmoney.faultdetector.config;
 import com.rbkmoney.faultdetector.data.ServiceOperation;
 import com.rbkmoney.faultdetector.serializer.ServiceOperationDeserializer;
 import com.rbkmoney.faultdetector.serializer.ServiceOperationSerializer;
-import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -25,8 +24,6 @@ public class KafkaConfig {
 
     private static final String EARLIEST = "earliest";
 
-    private static final int KILOBYTE = 1024;
-
     @Value("${kafka.bootstrap.servers}")
     private String servers;
 
@@ -42,6 +39,15 @@ public class KafkaConfig {
     @Value("${kafka.poll.timeout}")
     private String pollTimeout;
 
+    @Value("${kafka.max-pool-records}")
+    private String maxPoolRecords;
+
+    @Value("${kafka.fetch-min-bytes}")
+    private String fetchMinBytes;
+
+    @Value("${kafka.fetch-max-wait-ms}")
+    private String fetchMaxWaitMs;
+
     @Bean
     public Producer<String, ServiceOperation> kafkaProducer() {
         Properties props = new Properties();
@@ -51,13 +57,6 @@ public class KafkaConfig {
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ServiceOperationSerializer.class);
         return new KafkaProducer<>(props);
-    }
-
-    @Bean
-    public KafkaAdmin kafkaAdmin() {
-        Map<String, Object> configs = new HashMap<>();
-        configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
-        return new KafkaAdmin(configs);
     }
 
     @Bean
@@ -83,9 +82,9 @@ public class KafkaConfig {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ServiceOperationDeserializer.class);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, EARLIEST);
-        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 300);
-        props.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, 50 * KILOBYTE);
-        props.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 10000);
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPoolRecords);
+        props.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, fetchMinBytes);
+        props.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, fetchMaxWaitMs);
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
@@ -94,7 +93,6 @@ public class KafkaConfig {
         ConcurrentKafkaListenerContainerFactory<String, ServiceOperation> factory
                 = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(serviceOperationConsumerFactory());
-        factory.setConcurrency(1);
         factory.setBatchListener(true);
         return factory;
     }

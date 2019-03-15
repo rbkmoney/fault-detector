@@ -3,7 +3,7 @@ package com.rbkmoney.faultdetector.utils;
 import com.rbkmoney.damsel.fault_detector.ServiceConfig;
 import com.rbkmoney.faultdetector.data.ServiceSettings;
 
-public final class SettingsUtils {
+public final class SettingsMappingUtils {
 
     public static ServiceSettings getServiceSettings(ServiceConfig serviceConfig) {
         ServiceSettings serviceSettings = new ServiceSettings();
@@ -13,6 +13,6 @@ public final class SettingsUtils {
         return serviceSettings;
     }
 
-    private SettingsUtils() {}
+    private SettingsMappingUtils() {}
 
 }

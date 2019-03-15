@@ -1,58 +1,49 @@
 package com.rbkmoney.faultdetector.handlers;
 
-import com.rbkmoney.faultdetector.data.ServiceOperation;
-import com.rbkmoney.faultdetector.data.ServicePreAggregates;
-import com.rbkmoney.faultdetector.data.ServiceSettings;
+import com.rbkmoney.faultdetector.data.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class CalculatePreAggregatesHandler implements Handler<String> {
 
-    private final Map<String, Map<String, ServiceOperation>> serviceMap;
-
-    private final Map<String, Map<Long, ServicePreAggregates>> servicePreAggregatesMap;
-
     private final Map<String, ServiceSettings> serviceSettingsMap;
+
+    private final ServicePreAggregates servicePreAggregates;
+
+    private final ServiceOperations serviceOperations;
 
     @Override
     public void handle(String serviceId) throws Exception {
-        Map<String, ServiceOperation> serviceOperationMap = serviceMap.get(serviceId);
+        Map<String, ServiceOperation> serviceOperationMap = serviceOperations.getServiceOperationsMap(serviceId);
         if (serviceOperationMap == null || serviceOperationMap.isEmpty()) {
+            log.debug("The list of operations for the service {} is empty", serviceId);
             return;
-        }
-
-        Map<Long, ServicePreAggregates> preAggregatesMap = servicePreAggregatesMap.get(serviceId);
-        if (preAggregatesMap == null) {
-            preAggregatesMap = new ConcurrentHashMap<>();
         }
 
         Long currentTimeMillis = System.currentTimeMillis();
 
-        ServicePreAggregates preAggregates = new ServicePreAggregates();
-        preAggregates.setServiceId(serviceId);
+        PreAggregates preAggregates = new PreAggregates();
         preAggregates.setAggregationTime(currentTimeMillis);
         preAggregates.setOperationsCount(serviceOperationMap.size());
 
         ServiceSettings serviceSettings = serviceSettingsMap.get(serviceId);
         for (ServiceOperation serviceOperation : serviceOperationMap.values()) {
-            prepareOperation(serviceOperation, preAggregates, serviceSettings, serviceOperationMap, currentTimeMillis);
+            String operationId = prepareOperation(serviceOperation, preAggregates, serviceSettings, currentTimeMillis);
+            serviceOperationMap.remove(operationId);
         }
 
-        preAggregatesMap.put(currentTimeMillis, preAggregates);
-        servicePreAggregatesMap.put(serviceId, preAggregatesMap);
+        servicePreAggregates.addPreAggregates(serviceId, preAggregates);
     }
 
-    private void prepareOperation(ServiceOperation serviceOperation,
-                                  ServicePreAggregates preAggregates,
+    private String prepareOperation(ServiceOperation serviceOperation,
+                                  PreAggregates preAggregates,
                                   ServiceSettings serviceSettings,
-                                  Map<String, ServiceOperation> serviceOperationMap,
                                   long currentTimeMillis) {
         if (serviceOperation.getEndTime() > 0) {
             long operExecTime = serviceOperation.getEndTime() - serviceOperation.getStartTime();
@@ -70,7 +61,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
                 int successOperationsCount = preAggregates.getSuccessOperationsCount() + 1;
                 preAggregates.setSuccessOperationsCount(successOperationsCount);
             }
-            serviceOperationMap.remove(serviceOperation.getOperationId());
+            return serviceOperation.getOperationId();
         } else {
             long operExecTime = currentTimeMillis - serviceOperation.getStartTime();
             if (operExecTime > serviceSettings.getOperationTimeLimit()) {
@@ -83,6 +74,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
                 int runningOperationsCount = preAggregates.getRunningOperationsCount() + 1;
                 preAggregates.setRunningOperationsCount(runningOperationsCount);
             }
+            return null;
         }
     }
 

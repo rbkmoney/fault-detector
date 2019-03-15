@@ -3,6 +3,7 @@ package com.rbkmoney.faultdetector.services;
 import com.rbkmoney.damsel.fault_detector.*;
 import com.rbkmoney.faultdetector.data.ServiceAggregates;
 import com.rbkmoney.faultdetector.data.ServiceOperation;
+import com.rbkmoney.faultdetector.data.ServiceOperations;
 import com.rbkmoney.faultdetector.data.ServiceSettings;
 import com.rbkmoney.faultdetector.handlers.Handler;
 import lombok.RequiredArgsConstructor;
@@ -13,9 +14,8 @@ import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
-import static com.rbkmoney.faultdetector.utils.SettingsUtils.getServiceSettings;
+import static com.rbkmoney.faultdetector.utils.SettingsMappingUtils.getServiceSettings;
 
 @Slf4j
 @Service
@@ -24,18 +24,18 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
 
     private final Map<String, ServiceAggregates> aggregatesMap;
 
-    private final Map<String, Map<String, ServiceOperation>> serviceMap;
-
     private final Map<String, ServiceSettings> serviceConfigMap;
 
     private final Handler<ServiceOperation> sendOperationHandler;
+
+    private final ServiceOperations serviceOperations;
 
     private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
 
     @Override
     public void initService(String serviceId, ServiceConfig serviceConfig) throws TException {
         setServiceSettings(serviceId, serviceConfig);
-        serviceMap.put(serviceId, new ConcurrentHashMap<>());
+        serviceOperations.initService(serviceId);
         log.info("Service {} have been initialized", serviceId);
     }
 
@@ -49,10 +49,11 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
                                   Operation operation,
                                   ServiceConfig serviceConfig) throws ServiceNotFoundException, TException {
         log.info("Start registration operation {} for service {}", operation, serviceId);
-        if (serviceConfigMap.get(serviceId) == null || serviceMap.get(serviceId) == null) {
+        if (!serviceConfigMap.containsKey(serviceId) || !serviceOperations.containsService(serviceId)) {
             log.error("Service {} is not initialized", serviceId);
             throw new ServiceNotFoundException();
         }
+
         setServiceSettings(serviceId, serviceConfig);
 
         try {

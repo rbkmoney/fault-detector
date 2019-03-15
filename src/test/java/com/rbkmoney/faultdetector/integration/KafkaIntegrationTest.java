@@ -1,13 +1,13 @@
 package com.rbkmoney.faultdetector.integration;
 
+import com.rbkmoney.damsel.fault_detector.ServiceConfig;
 import com.rbkmoney.faultdetector.data.ServiceOperation;
-import com.rbkmoney.faultdetector.data.ServiceSettings;
+import com.rbkmoney.faultdetector.data.ServiceOperations;
 import com.rbkmoney.faultdetector.handlers.Handler;
+import com.rbkmoney.faultdetector.services.FaultDetectorService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -17,18 +17,18 @@ public class KafkaIntegrationTest extends AbstractIntegrationTest {
     private Handler<ServiceOperation> SendOperationHandler;
 
     @Autowired
-    private Map<String, Map<String, ServiceOperation>> serviceMap;
+    private ServiceOperations serviceOperations;
 
     @Autowired
-    private Map<String, ServiceSettings> serviceSettingsMap;
+    private FaultDetectorService faultDetectorService;
 
     @Value("${kafka.topic}")
     private String topicName;
 
     @Test
     public void kafkaTest() throws Exception {
-        serviceSettingsMap.put("1", getServiceSettings());
-        serviceSettingsMap.put("2", getServiceSettings());
+        faultDetectorService.initService("1", getServiceConfig());
+        faultDetectorService.initService("2", getServiceConfig());
 
         SendOperationHandler.handle(getStartServiceEvent("1", "1"));
         SendOperationHandler.handle(getStartServiceEvent("2", "1"));
@@ -37,7 +37,7 @@ public class KafkaIntegrationTest extends AbstractIntegrationTest {
         Thread.sleep(1000);
         SendOperationHandler.handle(getErrorServiceEvent("2", "1"));
         Thread.sleep(45000);
-        assertEquals("Count of operations not equal to expected", 2, serviceMap.size());
+        assertEquals("Count of operations not equal", 2, serviceOperations.getServicesCount());
     }
 
     private ServiceOperation getStartServiceEvent(String serviceId, String operationId) {
@@ -65,12 +65,12 @@ public class KafkaIntegrationTest extends AbstractIntegrationTest {
         return event;
     }
 
-    private static ServiceSettings getServiceSettings() {
-        ServiceSettings serviceSettings = new ServiceSettings();
-        serviceSettings.setOperationTimeLimit(10000L);
-        serviceSettings.setSlidingWindow(50000L);
-        serviceSettings.setPreAggregationSize(1);
-        return serviceSettings;
+    private static ServiceConfig getServiceConfig() {
+        ServiceConfig serviceConfig = new ServiceConfig();
+        serviceConfig.setOperationTimeLimit(10000L);
+        serviceConfig.setSlidingWindow(50000L);
+        serviceConfig.setPreAggregationSize(1);
+        return serviceConfig;
     }
 
 }

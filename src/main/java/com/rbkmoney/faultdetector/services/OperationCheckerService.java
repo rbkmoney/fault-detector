@@ -1,6 +1,6 @@
 package com.rbkmoney.faultdetector.services;
 
-import com.rbkmoney.faultdetector.data.ServiceOperation;
+import com.rbkmoney.faultdetector.data.PreAggregates;
 import com.rbkmoney.faultdetector.data.ServicePreAggregates;
 import com.rbkmoney.faultdetector.data.ServiceSettings;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -17,9 +18,7 @@ public class OperationCheckerService {
 
     private final Map<String, ServiceSettings> serviceSettingsMap;
 
-    private final Map<String, Map<Long, ServicePreAggregates>> servicePreAggregatesMap;
-
-    private final Map<String, Map<String, ServiceOperation>> serviceMap;
+    private final ServicePreAggregates servicePreAggregates;
 
     @Scheduled(fixedDelayString = "${operations.revision}")
     void process() {
@@ -27,23 +26,12 @@ public class OperationCheckerService {
 
         // TODO: продумать после какого времени будет ERROR и как будут отстреливаться транзакции
         long currentTimeMillis = System.currentTimeMillis();
-        for (String serviceId : servicePreAggregatesMap.keySet()) {
+        for (String serviceId : servicePreAggregates.getServices()) {
             ServiceSettings settings = serviceSettingsMap.get(serviceId);
-            Map<Long, ServicePreAggregates> preAggregatesMap = servicePreAggregatesMap.get(serviceId);
-            for (ServicePreAggregates preAggregates : preAggregatesMap.values()) {
+            Set<PreAggregates> preAggregatesSet = servicePreAggregates.getPreAggregatesSet(serviceId);
+            for (PreAggregates preAggregates : preAggregatesSet) {
                 if (currentTimeMillis - preAggregates.getAggregationTime() > settings.getSlidingWindow()) {
-                    preAggregatesMap.remove(preAggregates.getAggregationTime());
-                }
-            }
-        }
-
-        // TODO: во время агрегации удалить зависшие операции
-        for (String serviceId : serviceMap.keySet()) {
-            ServiceSettings settings = serviceSettingsMap.get(serviceId);
-            Map<String, ServiceOperation> serviceOperationMap = serviceMap.get(serviceId);
-            for (ServiceOperation operation : serviceOperationMap.values()) {
-                if (currentTimeMillis - operation.getStartTime() > settings.getSlidingWindow()) {
-                    serviceOperationMap.remove(operation.getOperationId());
+                    preAggregatesSet.remove(preAggregates);
                 }
             }
         }
