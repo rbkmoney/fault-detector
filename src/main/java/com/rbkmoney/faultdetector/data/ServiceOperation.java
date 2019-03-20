@@ -3,15 +3,15 @@ package com.rbkmoney.faultdetector.data;
 import lombok.Data;
 
 @Data
-public class ServiceEvent {
+public class ServiceOperation {
 
     private String serviceId;
 
-    private String requestId;
+    private String operationId;
 
-    private Long startTime;
+    private long startTime;
 
-    private Long endTime;
+    private long endTime;
 
     private boolean error;
 

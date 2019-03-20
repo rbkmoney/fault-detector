@@ -1,46 +1,41 @@
 package com.rbkmoney.faultdetector.services;
 
-import com.rbkmoney.faultdetector.data.ServiceEvent;
+import com.rbkmoney.faultdetector.data.PreAggregates;
+import com.rbkmoney.faultdetector.data.ServicePreAggregates;
+import com.rbkmoney.faultdetector.data.ServiceSettings;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class OperationCheckerService {
 
-    @Autowired
-    private Map<String, Map<String, ServiceEvent>> serviceEventMap;
+    private final Map<String, ServiceSettings> serviceSettingsMap;
 
-    @Value("${operations.event-delay}")
-    private long eventDelay;
+    private final ServicePreAggregates servicePreAggregates;
 
-    @Value("${operations.hovering-delay}")
-    private long hoveringDelay;
-
-    @Scheduled(fixedDelayString = "${operations.lifetime}")
+    @Scheduled(fixedDelayString = "${operations.revision}")
     void process() {
         log.debug("Start checking the correctness of the operation time");
 
-        for (String serviceId : serviceEventMap.keySet()) {
-            log.debug("Checking the correctness of the operation time for service {}", serviceId);
-            Map<String, ServiceEvent> eventMap = serviceEventMap.get(serviceId);
-            for (String requestId : eventMap.keySet()) {
-                ServiceEvent serviceEvent = eventMap.get(requestId);
-                Long startTime = serviceEvent.getStartTime();
-                Long endTime = serviceEvent.getEndTime();
-                long currentTime = System.currentTimeMillis();
-                boolean isOldEvent = endTime != null && (currentTime - endTime) > eventDelay;
-                boolean isEventNotFinished = endTime == null && (currentTime - startTime) > hoveringDelay;
-                if (isOldEvent || isEventNotFinished) {
-                    eventMap.remove(requestId);
+        // TODO: продумать после какого времени будет ERROR и как будут отстреливаться транзакции
+        long currentTimeMillis = System.currentTimeMillis();
+        for (String serviceId : servicePreAggregates.getServices()) {
+            ServiceSettings settings = serviceSettingsMap.get(serviceId);
+            Set<PreAggregates> preAggregatesSet = servicePreAggregates.getPreAggregatesSet(serviceId);
+            for (PreAggregates preAggregates : preAggregatesSet) {
+                if (currentTimeMillis - preAggregates.getAggregationTime() > settings.getSlidingWindow()) {
+                    preAggregatesSet.remove(preAggregates);
                 }
             }
         }
+
         log.debug("Checking the correctness of the operation time was finished");
     }
 

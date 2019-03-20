@@ -1,29 +1,41 @@
 package com.rbkmoney.faultdetector.config;
 
-import com.rbkmoney.faultdetector.data.ServiceAvailability;
-import com.rbkmoney.faultdetector.data.ServiceEvent;
+import com.rbkmoney.faultdetector.data.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-// TODO: Map'ы сделаны только в рамках MVP. далее будет переведено на kafka
 @Configuration
 public class AppConfig {
 
-    private final Map<String, ServiceAvailability> availabilityMap = new ConcurrentHashMap<>();
+    private final Map<String, ServiceAggregates> aggregatesMap = new ConcurrentHashMap<>();
 
-    private final Map<String, Map<String, ServiceEvent>> serviceEventMap = new ConcurrentHashMap<>();
+    private final Map<String, ServiceSettings> serviceSettingsMap = new ConcurrentHashMap<>();
+
+    private final ServicePreAggregates servicePreAggregates = new ServicePreAggregates();
+
+    private final ServiceOperations serviceOperations = new ServiceOperations();
 
     @Bean
-    public Map<String, ServiceAvailability> availabilityMap() {
-        return availabilityMap;
+    public Map<String, ServiceAggregates> aggregatesMap() {
+        return aggregatesMap;
     }
 
     @Bean
-    public Map<String, Map<String, ServiceEvent>> serviceEventMap() {
-        return serviceEventMap;
+    public Map<String, ServiceSettings> serviceConfigMap() {
+        return serviceSettingsMap;
+    }
+
+    @Bean
+    public ServicePreAggregates servicePreAggregates() {
+        return servicePreAggregates;
+    }
+
+    @Bean
+    public ServiceOperations serviceOperations() {
+        return serviceOperations;
     }
 
 }

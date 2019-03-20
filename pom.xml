@@ -46,7 +46,7 @@
         <dependency>
             <groupId>com.rbkmoney</groupId>
             <artifactId>fault-detector-proto</artifactId>
-            <version>1.15-641c4c4</version>
+            <version>1.18-3c72709</version>
         </dependency>
 
         <!--spring-->
@@ -84,8 +84,13 @@
         <!--kafka-->
         <dependency>
             <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-streams</artifactId>
+            <version>2.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
-            <version>2.1.0</version>
+            <version>2.1.1</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.kafka</groupId>

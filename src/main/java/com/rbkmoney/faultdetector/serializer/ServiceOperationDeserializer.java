@@ -2,24 +2,24 @@ package com.rbkmoney.faultdetector.serializer;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rbkmoney.faultdetector.data.ServiceEvent;
+import com.rbkmoney.faultdetector.data.ServiceOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Deserializer;
 
 import java.util.Map;
 
 @Slf4j
-public class ServiceEventDeserializer implements Deserializer<ServiceEvent> {
+public class ServiceOperationDeserializer implements Deserializer<ServiceOperation> {
 
     private final ObjectMapper om = new ObjectMapper();
 
     @Override
-    public ServiceEvent deserialize(String topic, byte[] data) {
+    public ServiceOperation deserialize(String topic, byte[] data) {
         try {
             om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            return om.readValue(data, ServiceEvent.class);
+            return om.readValue(data, ServiceOperation.class);
         } catch (Exception e) {
-            log.error("Error when deserialize service event data: {} ", data, e);
+            log.error("Error when deserialize service operation data: {} ", data, e);
             return null;
         }
     }
