@@ -1,29 +1,29 @@
-package com.rbkmoney.faultdetector.config;
+package com.rbkmoney.faultdetector.integration;
 
 import com.rbkmoney.faultdetector.data.ServiceOperation;
 import com.rbkmoney.faultdetector.serializer.ServiceOperationDeserializer;
 import com.rbkmoney.faultdetector.serializer.ServiceOperationSerializer;
-import org.apache.kafka.clients.CommonClientConfigs;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.config.SslConfigs;
-import org.apache.kafka.common.security.auth.SecurityProtocol;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
+import org.springframework.test.context.TestPropertySource;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-@Configuration
-@Profile({ "prod" })
-public class KafkaConfig {
+@Slf4j
+@TestConfiguration
+@TestPropertySource("target/classes/application.yml")
+@Profile({ "test" })
+public class KafkaTestConfig {
 
     private static final String EARLIEST = "earliest";
 
@@ -51,27 +51,6 @@ public class KafkaConfig {
     @Value("${kafka.fetch-max-wait-ms}")
     private String fetchMaxWaitMs;
 
-    @Value("${kafka.ssl.truststore.location-config}")
-    private String sslTruststoreLocationConfig;
-
-    @Value("${kafka.ssl.truststore.password-config}")
-    private String sslTruststorePasswordConfig;
-
-    @Value("${kafka.ssl.truststore.type}")
-    private String sslTruststoreType;
-
-    @Value("${kafka.ssl.keystore.location-config}")
-    private String sslKeystoreLocationConfig;
-
-    @Value("${kafka.ssl.keystore.password-config}")
-    private String sslKeystorePasswordConfig;
-
-    @Value("${kafka.ssl.keystore.type}")
-    private String sslKeystoreType;
-
-    @Value("${kafka.ssl.key.password-config}")
-    private String sslKeyPasswordConfig;
-
     @Bean
     public ProducerFactory<String, ServiceOperation> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
@@ -80,8 +59,6 @@ public class KafkaConfig {
         configProps.put(ProducerConfig.ACKS_CONFIG, "all");
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ServiceOperationSerializer.class);
-
-        addSslKafkaProps(configProps);
 
         return new DefaultKafkaProducerFactory<>(configProps);
     }
@@ -103,25 +80,7 @@ public class KafkaConfig {
         props.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, fetchMinBytes);
         props.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, fetchMaxWaitMs);
 
-        addSslKafkaProps(props);
-
         return new DefaultKafkaConsumerFactory<>(props);
-    }
-
-    private void addSslKafkaProps(Map<String, Object> props) {
-        //configure the following three settings for SSL Encryption/Decryption
-        props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name);
-        //
-        props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, new File(sslTruststoreLocationConfig).getAbsolutePath());
-        props.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, sslTruststorePasswordConfig);
-        props.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, sslTruststoreType);
-
-        // The keystore stores each machine's own identity
-        props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, new File(sslKeystoreLocationConfig).getAbsolutePath());
-        props.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, sslKeystorePasswordConfig);
-        props.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, sslKeystoreType);
-
-        props.put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, sslKeyPasswordConfig);
     }
 
     @Bean

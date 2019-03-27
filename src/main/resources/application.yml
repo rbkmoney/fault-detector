@@ -3,6 +3,9 @@ server:
 spring:
   application:
     name: @project.name@
+  profiles:
+    active: prod
+
 info:
   version: @project.version@
   stage: dev
@@ -25,6 +28,17 @@ kafka:
   max-pool-records: 300
   fetch-min-bytes: 1024
   fetch-max-wait-ms: 1000
+  ssl:
+    truststore:
+      location-config: "server.p12"
+      password-config: "test1234"
+      type: "PKCS12"
+    keystore:
+      location-config: "client.p12"
+      password-config: "test1234"
+      type: "PKCS12"
+    key:
+      password-config: "test1234"
 
 management:
   security:

@@ -1,8 +1,6 @@
 package com.rbkmoney.faultdetector.services;
 
-import com.rbkmoney.faultdetector.data.PreAggregates;
-import com.rbkmoney.faultdetector.data.ServicePreAggregates;
-import com.rbkmoney.faultdetector.data.ServiceSettings;
+import com.rbkmoney.faultdetector.data.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,6 +18,8 @@ public class OperationCheckerService {
 
     private final ServicePreAggregates servicePreAggregates;
 
+    private final ServiceOperations serviceOperations;
+
     @Scheduled(fixedDelayString = "${operations.revision}")
     void process() {
         log.debug("Start checking the correctness of the operation time");
@@ -32,6 +32,18 @@ public class OperationCheckerService {
             for (PreAggregates preAggregates : preAggregatesSet) {
                 if (currentTimeMillis - preAggregates.getAggregationTime() > settings.getSlidingWindow()) {
                     preAggregatesSet.remove(preAggregates);
+                }
+            }
+        }
+
+        // TODO: зависшие операции после выхода за пределы скользящего окна удаляются.
+        //       После начала взаимодействия с сервисами роутинга возможно стоит пересмотреть подход к удалению
+        for (String serviceId : serviceOperations.getServices()) {
+            ServiceSettings settings = serviceSettingsMap.get(serviceId);
+            Map<String, ServiceOperation> serviceEventMap = serviceOperations.getServiceOperationsMap(serviceId);
+            for (ServiceOperation event : serviceEventMap.values()) {
+                if (currentTimeMillis - event.getStartTime() > settings.getSlidingWindow()) {
+                    serviceEventMap.remove(event.getOperationId());
                 }
             }
         }
