@@ -66,7 +66,6 @@ public class KafkaConfig {
     @Value("${kafka.ssl.key.password-config}")
     private String sslKeyPasswordConfig;
 
-
     @Bean
     public ProducerFactory<String, ServiceOperation> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
@@ -106,14 +105,15 @@ public class KafkaConfig {
     private void addSslKafkaProps(Map<String, Object> props) {
         //configure the following three settings for SSL Encryption/Decryption
         props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name);
+        //
         props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, new File(sslTruststoreLocationConfig).getAbsolutePath());
         props.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, sslTruststorePasswordConfig);
-        props.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "p12");
+        props.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "PKCS12");
 
-        // configure the following three settings for SSL Authentication
+        // The keystore stores each machine's own identity
         props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, new File(sslKeystoreLocationConfig).getAbsolutePath());
         props.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, sslKeystorePasswordConfig);
-        props.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "p12");
+        props.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PKCS12");
 
         props.put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, sslKeyPasswordConfig);
     }

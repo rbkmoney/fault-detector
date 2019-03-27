@@ -3,11 +3,12 @@ server:
 spring:
   application:
     name: @project.name@
+  profiles:
+    active: prod
+
 info:
   version: @project.version@
   stage: dev
-
-
 
 preparing:
   delay: 5000
@@ -29,10 +30,10 @@ kafka:
   fetch-max-wait-ms: 1000
   ssl:
     truststore:
-      location-config: "src/main/resources/certs/truststore.jks"
+      location-config: "server.p12"
       password-config: "test1234"
     keystore:
-      location-config: "src/main/resources/certs/local-client.keystore.jks"
+      location-config: "client.p12"
       password-config: "test1234"
     key:
       password-config: "test1234"
