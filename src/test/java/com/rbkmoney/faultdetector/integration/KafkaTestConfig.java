@@ -51,22 +51,6 @@ public class KafkaTestConfig {
     @Value("${kafka.fetch-max-wait-ms}")
     private String fetchMaxWaitMs;
 
-    @Value("${kafka.ssl.truststore.location-config}")
-    private String sslTruststoreLocationConfig;
-
-    @Value("${kafka.ssl.truststore.password-config}")
-    private String sslTruststorePasswordConfig;
-
-    @Value("${kafka.ssl.keystore.location-config}")
-    private String sslKeystoreLocationConfig;
-
-    @Value("${kafka.ssl.keystore.password-config}")
-    private String sslKeystorePasswordConfig;
-
-    @Value("${kafka.ssl.key.password-config}")
-    private String sslKeyPasswordConfig;
-
-
     @Bean
     public ProducerFactory<String, ServiceOperation> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();

@@ -32,9 +32,11 @@ kafka:
     truststore:
       location-config: "server.p12"
       password-config: "test1234"
+      type: "PKCS12"
     keystore:
       location-config: "client.p12"
       password-config: "test1234"
+      type: "PKCS12"
     key:
       password-config: "test1234"
 

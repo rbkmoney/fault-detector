@@ -57,11 +57,17 @@ public class KafkaConfig {
     @Value("${kafka.ssl.truststore.password-config}")
     private String sslTruststorePasswordConfig;
 
+    @Value("${kafka.ssl.truststore.type}")
+    private String sslTruststoreType;
+
     @Value("${kafka.ssl.keystore.location-config}")
     private String sslKeystoreLocationConfig;
 
     @Value("${kafka.ssl.keystore.password-config}")
     private String sslKeystorePasswordConfig;
+
+    @Value("${kafka.ssl.keystore.type}")
+    private String sslKeystoreType;
 
     @Value("${kafka.ssl.key.password-config}")
     private String sslKeyPasswordConfig;
@@ -108,12 +114,12 @@ public class KafkaConfig {
         //
         props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, new File(sslTruststoreLocationConfig).getAbsolutePath());
         props.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, sslTruststorePasswordConfig);
-        props.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "PKCS12");
+        props.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, sslTruststoreType);
 
         // The keystore stores each machine's own identity
         props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, new File(sslKeystoreLocationConfig).getAbsolutePath());
         props.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, sslKeystorePasswordConfig);
-        props.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PKCS12");
+        props.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, sslKeystoreType);
 
         props.put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, sslKeyPasswordConfig);
     }
