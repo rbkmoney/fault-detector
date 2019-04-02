@@ -13,7 +13,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>Fault detector</name>
+    <name>Fault Detector</name>
     <description>Services fault detector</description>
 
     <properties>

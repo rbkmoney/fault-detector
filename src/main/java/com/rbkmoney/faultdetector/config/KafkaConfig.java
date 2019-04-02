@@ -81,7 +81,7 @@ public class KafkaConfig {
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ServiceOperationSerializer.class);
 
-        addSslKafkaProps(configProps);
+        //addSslKafkaProps(configProps);
 
         return new DefaultKafkaProducerFactory<>(configProps);
     }
@@ -103,7 +103,7 @@ public class KafkaConfig {
         props.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, fetchMinBytes);
         props.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, fetchMaxWaitMs);
 
-        addSslKafkaProps(props);
+        //addSslKafkaProps(props);
 
         return new DefaultKafkaConsumerFactory<>(props);
     }
