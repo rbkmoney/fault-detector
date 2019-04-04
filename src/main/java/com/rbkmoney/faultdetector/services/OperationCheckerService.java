@@ -48,7 +48,7 @@ public class OperationCheckerService {
             }
         }
 
-        log.debug("Checking the correctness of the operation time was finished");
+        log.info("Checking the correctness of the operation time was finished");
     }
 
 }

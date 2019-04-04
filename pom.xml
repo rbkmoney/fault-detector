@@ -22,8 +22,9 @@
         <java.version>11</java.version>
         <server.port>8022</server.port>
         <exposed.ports>${server.port}</exposed.ports>
-        <dockerfile.base.service.tag>4f3b89c6381373923f5fdea18b08741b9bada1e6</dockerfile.base.service.tag>
-        <shared.resources.version>0.3.3</shared.resources.version>
+        <dockerfile.base.service.tag>bc95d0d6dc13c693acd2b274531a7d604b877bf3</dockerfile.base.service.tag>
+        <dockerfile.registry>dr2.rbkmoney.com</dockerfile.registry>
+        <shared.resources.version>0.3.6</shared.resources.version>
     </properties>
 
     <dependencies>

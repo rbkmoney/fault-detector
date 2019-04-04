@@ -13,7 +13,6 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 
@@ -22,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@Profile({ "prod" })
 public class KafkaConfig {
 
     private static final String EARLIEST = "earliest";
@@ -72,6 +70,9 @@ public class KafkaConfig {
     @Value("${kafka.ssl.key.password-config}")
     private String sslKeyPasswordConfig;
 
+    @Value("${kafka.ssl.enable}")
+    private boolean sslEnable;
+
     @Bean
     public ProducerFactory<String, ServiceOperation> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
@@ -81,7 +82,9 @@ public class KafkaConfig {
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ServiceOperationSerializer.class);
 
-        addSslKafkaProps(configProps);
+        if (sslEnable) {
+            addSslKafkaProps(configProps);
+        }
 
         return new DefaultKafkaProducerFactory<>(configProps);
     }
@@ -103,15 +106,17 @@ public class KafkaConfig {
         props.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, fetchMinBytes);
         props.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, fetchMaxWaitMs);
 
-        addSslKafkaProps(props);
+        if (sslEnable) {
+            addSslKafkaProps(props);
+        }
 
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
     private void addSslKafkaProps(Map<String, Object> props) {
-        //configure the following three settings for SSL Encryption/Decryption
+        // configure the following three settings for SSL Encryption/Decryption
         props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name);
-        //
+        // The truststore stores all the certificates that the machine should trust
         props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, new File(sslTruststoreLocationConfig).getAbsolutePath());
         props.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, sslTruststorePasswordConfig);
         props.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, sslTruststoreType);
