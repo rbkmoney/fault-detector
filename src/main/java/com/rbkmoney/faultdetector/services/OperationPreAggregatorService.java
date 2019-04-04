@@ -28,6 +28,7 @@ public class OperationPreAggregatorService {
                         "for the service " + serviceId, e);
             }
         }
+        log.info("Operations pre-aggregations was finished");
     }
 
 }

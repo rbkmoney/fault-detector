@@ -28,7 +28,7 @@ public class OperationListener {
         }
 
         // TODO: возможно стоит пересчитывать преагрегаты сразу после обновления мапы с операциями
-        log.debug("{} operations were obtained", serviceOperationsList.size());
+        log.info("{} operations from kafka were obtained", serviceOperationsList.size());
     }
 
 }

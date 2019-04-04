@@ -24,7 +24,7 @@ public class PrepareStatisticsService {
             //       расчет конечного значения на лету во время вызова
             calculateAggregatesHandler.handle(serviceId);
         }
-        log.debug("Processing the services statistics was finished");
+        log.info("Processing the services statistics was finished");
     }
 
 }

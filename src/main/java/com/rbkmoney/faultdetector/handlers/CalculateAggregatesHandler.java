@@ -42,7 +42,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
         double failureRate = failureRateSum / weightSum;
         ServiceAggregates serviceAggregates = getServiceAggregates(serviceId, failureRate, preAggregatesSet);
         serviceAggregatesMap.put(serviceId, serviceAggregates);
-        log.debug("Processing the service statistics for service {} was finished", serviceId);
+        log.info("Processing the service statistics for service {} was finished", serviceId);
     }
 
     private ServiceAggregates getServiceAggregates(String serviceId,

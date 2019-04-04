@@ -92,7 +92,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
 
     @Override
     public List<ServiceStatistics> getStatistics(List<String> services) throws TException {
-        log.debug("Check statictics for the services {}", services);
+        log.info("Check statictics for the services {}", services);
         List<ServiceStatistics> serviceStatisticsList = new ArrayList<>();
 
         for (String serviceId : services) {
