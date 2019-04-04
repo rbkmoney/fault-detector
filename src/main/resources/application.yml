@@ -33,7 +33,7 @@ kafka:
       password-config: kenny12
       type: "PKCS12"
     keystore:
-      location-config: src/main/resources/cert/kenny-k.struzhkin.p12
+      location-config: src/main/resources/cert/keystore.p12
       password-config: kenny
       type: "PKCS12"
     key:
