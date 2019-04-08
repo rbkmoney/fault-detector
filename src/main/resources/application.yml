@@ -2,7 +2,7 @@ server:
   port: @server.port@
 spring:
   application:
-    name: fault
+    name: @project.name@
 
 info:
   version: @project.version@
@@ -18,8 +18,8 @@ operations:
 
 kafka:
   bootstrap:
-    servers: kenny-kafka1.bst1.rbkmoney.net:9092
-  topic: fault-detector
+    servers: "kenny-kafka1.bst1.rbkmoney.net:9092"
+  topic: "fault-detector"
   client.id: "fault-detector"
   group.id: "fault-detector"
   poll.timeout: 5000
@@ -29,15 +29,15 @@ kafka:
   ssl:
     enable: true
     truststore:
-      location-config: src/main/resources/cert/truststore.p12
-      password-config: kenny12
+      location-config: "src/main/resources/cert/truststore.p12"
+      password-config: "kenny12"
       type: "PKCS12"
     keystore:
-      location-config: src/main/resources/cert/keystore.p12
-      password-config: kenny
+      location-config: "src/main/resources/cert/keystore.p12"
+      password-config: "kenny"
       type: "PKCS12"
     key:
-      password-config: kenny
+      password-config: "kenny"
 
 management:
   security:
