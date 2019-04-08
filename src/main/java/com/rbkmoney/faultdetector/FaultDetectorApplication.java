@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class FaultDetectorApplication extends SpringApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(FaultDetectorApplication.class);
+        SpringApplication.run(FaultDetectorApplication.class, args);
     }
 
 }
