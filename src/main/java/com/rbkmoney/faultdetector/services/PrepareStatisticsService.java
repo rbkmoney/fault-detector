@@ -17,12 +17,16 @@ public class PrepareStatisticsService {
     private final ServiceOperations serviceOperations;
 
     @Scheduled(fixedDelayString = "${preparing.delay}")
-    public void prepare() throws Exception {
+    public void prepare() {
         log.debug("Start processing the services statistics");
         for (String serviceId : serviceOperations.getServices()) {
             // TODO: так как подсчет ведется уже из пре агрегатов, то возможно имеет производить
             //       расчет конечного значения на лету во время вызова
-            calculateAggregatesHandler.handle(serviceId);
+            try {
+                calculateAggregatesHandler.handle(serviceId);
+            } catch (Exception ex) {
+                log.error("Obtained error when handler calculate the aggregates for service {}", serviceId, ex);
+            }
         }
         log.info("Processing the services statistics was finished");
     }

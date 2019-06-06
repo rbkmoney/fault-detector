@@ -38,6 +38,8 @@ kafka:
       type: "PKCS12"
     key:
       password-config: "kenny"
+  consumer:
+    concurrency: 3
 
 management:
   security:

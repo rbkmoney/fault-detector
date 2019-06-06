@@ -18,7 +18,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
     private final ServicePreAggregates servicePreAggregates;
 
     @Override
-    public void handle(String serviceId) throws Exception {
+    public void handle(String serviceId) {
         log.debug("Start processing the service statistics for service {}", serviceId);
 
         Set<PreAggregates> preAggregatesSet = servicePreAggregates.getPreAggregatesSet(serviceId);
@@ -68,6 +68,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
                 .orElse(new PreAggregates());
         serviceAggregates.setOperationsCount(lastPreAggregates.getRunningOperationsCount() +
                 lastPreAggregates.getOvertimeOperationsCount() + totalSuccessOpers + totalErrorOpers);
+        log.info("Aggregates for service {}: {}", serviceId, serviceAggregates);
         return serviceAggregates;
     }
 
