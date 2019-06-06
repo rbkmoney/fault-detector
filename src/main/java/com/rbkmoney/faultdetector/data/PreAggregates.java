@@ -20,6 +20,22 @@ public class PreAggregates implements Comparable<PreAggregates> {
 
     private int successOperationsCount;
 
+    public void addRunningOperation() {
+        runningOperationsCount++;
+    }
+
+    public void addOvertimeOperation() {
+        overtimeOperationsCount++;
+    }
+
+    public void addErrorOperation() {
+        errorOperationsCount++;
+    }
+
+    public void addSuccessOperation() {
+        successOperationsCount++;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
