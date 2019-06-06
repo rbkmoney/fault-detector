@@ -18,7 +18,7 @@ public class SendOperationHandler implements Handler<ServiceOperation> {
     private String topicName;
 
     @Override
-    public void handle(ServiceOperation serviceOperation) throws Exception {
+    public void handle(ServiceOperation serviceOperation) {
         kafkaTemplate.send(topicName, serviceOperation);
     }
 

@@ -18,7 +18,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
     private final ServicePreAggregates servicePreAggregates;
 
     @Override
-    public void handle(String serviceId) throws Exception {
+    public void handle(String serviceId) {
         log.debug("Start processing the service statistics for service {}", serviceId);
 
         Set<PreAggregates> preAggregatesSet = servicePreAggregates.getPreAggregatesSet(serviceId);
@@ -34,12 +34,13 @@ public class CalculateAggregatesHandler implements Handler<String> {
             weight++;
             int overtimeOperationsCount = preAggregates.getOvertimeOperationsCount();
             int errorOperationsCount = preAggregates.getErrorOperationsCount();
-            double failureOperationsCount = errorOperationsCount + overtimeOperationsCount;
-            failureRateSum += (failureOperationsCount / preAggregates.getOperationsCount()) * weight;
+            int failureOperationsCount = errorOperationsCount + overtimeOperationsCount;
+            failureRateSum += ((double) failureOperationsCount / preAggregates.getOperationsCount()) * weight;
             weightSum += weight;
         }
 
-        double failureRate = failureRateSum / weightSum;
+        double failureRate = weightSum == 0 ? 0 : failureRateSum / weightSum;
+
         ServiceAggregates serviceAggregates = getServiceAggregates(serviceId, failureRate, preAggregatesSet);
         serviceAggregatesMap.put(serviceId, serviceAggregates);
         log.info("Processing the service statistics for service {} was finished", serviceId);
@@ -64,9 +65,10 @@ public class CalculateAggregatesHandler implements Handler<String> {
 
         PreAggregates lastPreAggregates = preAggregatesSet.stream()
                 .max(Comparator.comparingLong(agg -> agg.getAggregationTime()))
-                .orElse(null);
+                .orElse(new PreAggregates());
         serviceAggregates.setOperationsCount(lastPreAggregates.getRunningOperationsCount() +
                 lastPreAggregates.getOvertimeOperationsCount() + totalSuccessOpers + totalErrorOpers);
+        log.info("Aggregates for service {}: {}", serviceId, serviceAggregates);
         return serviceAggregates;
     }
 

@@ -19,7 +19,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
     private final ServiceOperations serviceOperations;
 
     @Override
-    public void handle(String serviceId) throws Exception {
+    public void handle(String serviceId) {
         Map<String, ServiceOperation> serviceOperationMap = serviceOperations.getServiceOperationsMap(serviceId);
         if (serviceOperationMap == null || serviceOperationMap.isEmpty()) {
             log.debug("The list of operations for the service {} is empty", serviceId);

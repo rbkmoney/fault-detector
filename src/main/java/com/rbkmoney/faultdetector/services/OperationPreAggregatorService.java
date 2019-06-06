@@ -23,9 +23,9 @@ public class OperationPreAggregatorService {
         for (String serviceId : serviceOperations.getServices()) {
             try {
                 calculatePreAggregatesHandler.handle(serviceId);
-            } catch (Exception e) {
+            } catch (Exception ex) {
                 log.error("An error was received during the pre-aggregation of operations " +
-                        "for the service " + serviceId, e);
+                        "for the service {}", serviceId, ex);
             }
         }
         log.info("Operations pre-aggregations was finished");
