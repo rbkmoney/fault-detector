@@ -143,7 +143,7 @@ public class KafkaConfig {
         ConcurrentKafkaListenerContainerFactory<String, ServiceOperation> factory
                 = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(serviceOperationConsumerFactory());
-        factory.setBatchListener(true);
+        factory.setBatchListener(false);
         factory.setErrorHandler(new SeekToCurrentErrorHandler(kafkaCustomRecoverer()));
         factory.setConcurrency(concurrency);
 
