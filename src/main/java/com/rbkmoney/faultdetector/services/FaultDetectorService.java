@@ -33,7 +33,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
 
     private final ServiceOperations serviceOperations;
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
 
     @Override
     public void initService(String serviceId, ServiceConfig serviceConfig) throws TException {

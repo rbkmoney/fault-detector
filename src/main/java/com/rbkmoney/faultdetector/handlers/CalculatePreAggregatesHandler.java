@@ -49,17 +49,14 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
             long operExecTime = serviceOperation.getEndTime() - serviceOperation.getStartTime();
             if (serviceOperation.isError()) {
                 // Добавляем сбойную операцию в преагрегат и удаляем из списка операций
-                int errorOperationsCount = preAggregates.getErrorOperationsCount() + 1;
-                preAggregates.setErrorOperationsCount(errorOperationsCount);
+                preAggregates.addErrorOperation();
             } else if (operExecTime > serviceSettings.getOperationTimeLimit()) {
                 // Добавляем завершившуюся зависшую операцию в агрегат.
                 // Так как операция уже завершилась она удаляется из списка
-                int overtimeOperationsCount = preAggregates.getOvertimeOperationsCount() + 1;
-                preAggregates.setOvertimeOperationsCount(overtimeOperationsCount);
+                preAggregates.addOvertimeOperation();
             } else {
                 // Добавляем в список выполняющихся
-                int successOperationsCount = preAggregates.getSuccessOperationsCount() + 1;
-                preAggregates.setSuccessOperationsCount(successOperationsCount);
+                preAggregates.addSuccessOperation();
             }
             return serviceOperation.getOperationId();
         } else {
@@ -67,12 +64,10 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
             if (operExecTime > serviceSettings.getOperationTimeLimit()) {
                 // Зависшая операция должна учитываться как сбойная, но не удаляться из
                 // общего списка, чтобы было понимание сколько операций "висит"
-                int hoveringOperationsCount = preAggregates.getOvertimeOperationsCount() + 1;
-                preAggregates.setOvertimeOperationsCount(hoveringOperationsCount);
+                preAggregates.addOvertimeOperation();
             } else {
                 // Операция еще выполняется и не превысила допустимое на выполнение время
-                int runningOperationsCount = preAggregates.getRunningOperationsCount() + 1;
-                preAggregates.setRunningOperationsCount(runningOperationsCount);
+                preAggregates.addRunningOperation();
             }
             return null;
         }

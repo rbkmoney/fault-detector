@@ -24,7 +24,7 @@ public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private FaultDetectorService faultDetectorService;
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
 
     @Test
     public void serviceTest() throws TException, ParseException, InterruptedException {
