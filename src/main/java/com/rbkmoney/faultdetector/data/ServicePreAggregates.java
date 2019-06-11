@@ -20,6 +20,19 @@ public class ServicePreAggregates {
         servicePreAggregatesMap.put(serviceId, preAggregatesSet);
     }
 
+    public void cleanPreAggregares(String serviceId, ServiceSettings settings) {
+        if (servicePreAggregatesMap.containsKey(serviceId)) {
+            Set<PreAggregates> preAggregates = servicePreAggregatesMap.get(serviceId);
+            long currentTime = System.currentTimeMillis();
+            long slidingWindow = settings.getSlidingWindow();
+            preAggregates.removeIf(preAggregate -> currentTime - preAggregate.getAggregationTime() > slidingWindow);
+        }
+
+        if (servicePreAggregatesMap.get(serviceId).isEmpty()) {
+            servicePreAggregatesMap.remove(serviceId);
+        }
+    }
+
     public Set<PreAggregates> getPreAggregatesSet(String serviceId) {
         return servicePreAggregatesMap.get(serviceId);
     }

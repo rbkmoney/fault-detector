@@ -6,7 +6,6 @@ import com.rbkmoney.faultdetector.serializer.ServiceOperationSerializer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.config.SslConfigs;
 import org.apache.kafka.common.security.auth.SecurityProtocol;
@@ -17,12 +16,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
-import org.springframework.kafka.listener.SeekToCurrentErrorHandler;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 @Slf4j
 @Configuration
@@ -144,21 +141,9 @@ public class KafkaConfig {
                 = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(serviceOperationConsumerFactory());
         factory.setBatchListener(false);
-        factory.setErrorHandler(new SeekToCurrentErrorHandler(kafkaCustomRecoverer()));
         factory.setConcurrency(concurrency);
 
         return factory;
-    }
-
-    private BiConsumer<ConsumerRecord<?, ?>, Exception> kafkaCustomRecoverer() {
-        return (data, thrownException) -> {
-            if (data != null) {
-                log.error("Error while processing: data-key: {}, data-offset: {}, data-partition: {}",
-                        data.key(), data.offset(), data.partition(), thrownException);
-            } else {
-                log.error("Error while processing", thrownException);
-            }
-        };
     }
 
 }

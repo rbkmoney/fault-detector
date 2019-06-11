@@ -51,6 +51,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
                                                    Set<PreAggregates> preAggregatesSet) {
         ServiceAggregates serviceAggregates = new ServiceAggregates();
         serviceAggregates.setServiceId(serviceId);
+        serviceAggregates.setAggregateTime(System.currentTimeMillis());
         serviceAggregates.setFailureRate(failureRate);
 
         long totalSuccessOpers = preAggregatesSet.stream()
