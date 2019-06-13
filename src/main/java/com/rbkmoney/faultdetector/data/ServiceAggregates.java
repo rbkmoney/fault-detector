@@ -7,6 +7,8 @@ public class ServiceAggregates {
 
     private String serviceId;
 
+    private long aggregateTime;
+
     private double failureRate;
 
     private long operationsCount;

@@ -18,7 +18,7 @@ operations:
 
 kafka:
   bootstrap:
-    servers: "kenny-kafka1.bst1.rbkmoney.net:9092"
+    servers: "localhost:9092"
   topic: "fault-detector"
   client.id: "fault-detector"
   group.id: "fault-detector"
@@ -27,7 +27,7 @@ kafka:
   fetch-min-bytes: 1024
   fetch-max-wait-ms: 1000
   ssl:
-    enable: true
+    enable: false
     truststore:
       location-config: "src/main/resources/cert/truststore.p12"
       password-config: "kenny12"
@@ -39,7 +39,7 @@ kafka:
     key:
       password-config: "kenny"
   consumer:
-    concurrency: 3
+    concurrency: 1
 
 management:
   security:

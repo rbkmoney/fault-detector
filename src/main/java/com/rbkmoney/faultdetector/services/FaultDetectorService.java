@@ -11,9 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,9 +29,9 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
 
     private final Handler<ServiceOperation> sendOperationHandler;
 
-    private final ServiceOperations serviceOperations;
+    private final Handler<String> calculateAggregatesHandler;
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
+    private final ServiceOperations serviceOperations;
 
     @Override
     public void initService(String serviceId, ServiceConfig serviceConfig) throws TException {
@@ -87,7 +85,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
     }
 
     private long getTime(String dateString) {
-        return LocalDateTime.parse(dateString, formatter).toEpochSecond(ZoneOffset.UTC);
+        return Instant.parse(dateString).toEpochMilli();
     }
 
     @Override
@@ -96,6 +94,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
         List<ServiceStatistics> serviceStatisticsList = new ArrayList<>();
 
         for (String serviceId : services) {
+            calculateAggregatesHandler.handle(serviceId);
             ServiceAggregates aggregates = aggregatesMap.get(serviceId);
             if (aggregates != null) {
                 ServiceStatistics stat = new ServiceStatistics();
@@ -107,8 +106,19 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
                 serviceStatisticsList.add(stat);
             }
         }
+
+        clearUnusualAggregates();
         log.debug("Statistic for services: {}", serviceStatisticsList);
         return serviceStatisticsList;
+    }
+
+    private void clearUnusualAggregates() {
+        for (String serviceId : aggregatesMap.keySet()) {
+            long slidingWindow = serviceConfigMap.get(serviceId).getSlidingWindow();
+            if (System.currentTimeMillis() - aggregatesMap.get(serviceId).getAggregateTime() > slidingWindow) {
+                aggregatesMap.remove(serviceId);
+            }
+        }
     }
 
 }

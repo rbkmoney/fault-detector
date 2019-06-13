@@ -18,10 +18,15 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
 
     private final ServiceOperations serviceOperations;
 
+    private final Map<String, ServiceSettings> serviceConfigMap;
+
+    private static final String EMPTY_STRING = "";
+
     @Override
     public void handle(String serviceId) {
         Map<String, ServiceOperation> serviceOperationMap = serviceOperations.getServiceOperationsMap(serviceId);
         if (serviceOperationMap == null || serviceOperationMap.isEmpty()) {
+            //TODO: вопрос на мульт - заполнять пустыми значениями или не делать ничего?
             log.debug("The list of operations for the service {} is empty", serviceId);
             return;
         }
@@ -39,6 +44,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
         }
 
         servicePreAggregates.addPreAggregates(serviceId, preAggregates);
+        servicePreAggregates.cleanPreAggregares(serviceId, serviceConfigMap.get(serviceId));
     }
 
     private String prepareOperation(ServiceOperation serviceOperation,
@@ -69,7 +75,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
                 // Операция еще выполняется и не превысила допустимое на выполнение время
                 preAggregates.addRunningOperation();
             }
-            return null;
+            return EMPTY_STRING;
         }
     }
 

@@ -9,9 +9,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.ParseException;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,8 +22,6 @@ public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private FaultDetectorService faultDetectorService;
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
-
     @Test
     public void serviceTest() throws TException, ParseException, InterruptedException {
         String serviceId = "service_one";
@@ -35,11 +31,11 @@ public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
         int initOperationsDelta = 3000;
         ServiceConfig serviceConfig = getServiceConfig();
         faultDetectorService.initService(serviceId, serviceConfig);
-        List<Operation> startOperations =
-                sendStartOperations(serviceId, serviceConfig, initOperationsCount, initOperationsDelta);
+        List<Operation> startOperations = sendStartOperations(serviceId, serviceConfig,
+                initOperationsCount, initOperationsDelta);
         sendFinishOperations(serviceId, serviceConfig, startOperations, successOperationsCount);
         sendErrorOperations(serviceId, serviceConfig, startOperations, errorOperationsCount);
-        Thread.sleep(15000);
+        Thread.sleep(30000);
 
         List<String> services = new ArrayList<>();
         services.add(serviceId);
@@ -66,12 +62,11 @@ public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
                                                 ServiceConfig serviceConfig,
                                                 int operationsCount,
                                                 int delta) throws TException {
-        long startTimeMills = System.currentTimeMillis();
+        Instant startInstant = Instant.now();
         List<Operation> operations = new ArrayList<>();
         for (int i = 1; i <= operationsCount; i++) {
-            long operStartTime = startTimeMills + delta / i;
             String operationId = "oper_id_" + i;
-            String startTime = formatter.format(LocalDateTime.ofEpochSecond(operStartTime, 0, ZoneOffset.UTC));
+            String startTime = startInstant.plusMillis(delta / i).toString();
             Operation startOperation = getStartOperation(operationId, startTime);
             faultDetectorService.registerOperation(serviceId, startOperation, serviceConfig);
             operations.add(startOperation);
@@ -119,9 +114,8 @@ public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
         Operation startOperation = initOperations.get(currentOperationNumber);
         Operation finishOperation = new Operation();
         finishOperation.setOperationId(startOperation.getOperationId());
-        long timeStart = LocalDateTime.parse(startOperation.getState().getStart().getTimeStart(), formatter).toEpochSecond(ZoneOffset.UTC);
-        String finishOperationTime =
-                formatter.format(LocalDateTime.ofEpochSecond(timeStart + executionTime, 0, ZoneOffset.UTC));
+        Instant timeStart = Instant.parse(startOperation.getState().getStart().getTimeStart());
+        String finishOperationTime = timeStart.plusMillis(executionTime).toString();
         if (isError) {
             Error error = new Error();
             error.setTimeEnd(finishOperationTime);
@@ -142,7 +136,7 @@ public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
     private static ServiceConfig getServiceConfig() {
         ServiceConfig serviceConfig = new ServiceConfig();
         serviceConfig.setOperationTimeLimit(60000);
-        serviceConfig.setSlidingWindow(90000);
+        serviceConfig.setSlidingWindow(60000);
         serviceConfig.setPreAggregationSize(1);
         return serviceConfig;
     }
