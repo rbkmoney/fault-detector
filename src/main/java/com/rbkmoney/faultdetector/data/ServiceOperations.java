@@ -29,7 +29,7 @@ public class ServiceOperations {
                 operationsMap.put(operationId, serviceOperation);
                 log.debug("Operation with service id {} and operation id {} was added", serviceId, operationId);
             } else {
-                log.debug("For operation with service id {} and operation id {} was midified start time from {} to {}",
+                log.debug("For operation with service id {} and operation id {} was modified start time from {} to {}",
                         serviceId, operationId, operation.getStartTime(), serviceOperation.getStartTime());
                 operation.setStartTime(serviceOperation.getStartTime());
                 operationsMap.put(operationId, operation);
