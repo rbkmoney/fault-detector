@@ -18,18 +18,17 @@ public class OperationListener {
 
     @KafkaListener(topics = "${kafka.topic}", containerFactory = "kafkaListenerContainerFactory")
     public void listen(List<ServiceOperation> serviceOperationsList) {
-        log.trace("Number of operations received from topic: {}", serviceOperationsList.size());
+        log.debug("Number of operations received from topic: {}", serviceOperationsList.size());
 
         for (ServiceOperation serviceOperation : serviceOperationsList) {
 
             String serviceId = serviceOperation.getServiceId();
             String operationId = serviceOperation.getOperationId();
             serviceOperations.addOperation(serviceId, operationId, serviceOperation);
-            log.debug("Operation for service '{}' with id '{}' was processed", serviceId);
         }
 
         // TODO: возможно стоит пересчитывать преагрегаты сразу после обновления мапы с операциями
-        log.trace("{} operations from kafka were obtained", serviceOperationsList.size());
+        log.info("{} operations from kafka were obtained", serviceOperationsList.size());
     }
 
 }

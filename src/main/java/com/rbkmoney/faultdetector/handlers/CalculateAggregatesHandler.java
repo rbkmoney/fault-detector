@@ -22,8 +22,6 @@ public class CalculateAggregatesHandler implements Handler<String> {
         log.debug("Start processing the service statistics for service {}", serviceId);
 
         Set<PreAggregates> preAggregatesSet = servicePreAggregates.getPreAggregatesSet(serviceId);
-        log.debug("Count of pre-aggregates for service {}", preAggregatesSet.size());
-        log.trace("List of pre-aggregares: {}", preAggregatesSet);
 
         if (preAggregatesSet == null || preAggregatesSet.isEmpty()) {
             return;
@@ -39,12 +37,6 @@ public class CalculateAggregatesHandler implements Handler<String> {
             int failureOperationsCount = errorOperationsCount + overtimeOperationsCount;
             failureRateSum += ((double) failureOperationsCount / preAggregates.getOperationsCount()) * weight;
             weightSum += weight;
-            if (failureOperationsCount > 0) {
-                log.debug("For the service '{}' in the pre-aggregate '{}': overtimeOperationsCount - {}, " +
-                        "errorOperationsCount - {}, total - {}. A weight of the failure rate: {}",
-                        serviceId, preAggregates.getAggregationTime(), overtimeOperationsCount,
-                        errorOperationsCount, preAggregates.getOperationsCount(), weight);
-            }
         }
 
         double failureRate = weightSum == 0 ? 0 : failureRateSum / weightSum;

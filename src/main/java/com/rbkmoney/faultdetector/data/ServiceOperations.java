@@ -22,27 +22,17 @@ public class ServiceOperations {
 
     public void addOperation(String serviceId, String operationId, ServiceOperation serviceOperation) {
         Map<String, ServiceOperation> operationsMap = serviceMap.get(serviceId);
-        ServiceOperation operation = operationsMap.get(operationId);
 
         if (serviceOperation.getEndTime() <= 0) {
-            if (operation == null) {
-                operationsMap.put(operationId, serviceOperation);
-                log.debug("Operation with service id {} and operation id {} was added", serviceId, operationId);
-            } else {
-                log.debug("For operation with service id {} and operation id {} was midified start time from {} to ",
-                        serviceId, operationId, operation.getStartTime(), serviceOperation.getStartTime());
-                operation.setStartTime(serviceOperation.getStartTime());
-                operationsMap.put(operationId, operation);
-            }
+            operationsMap.put(operationId, serviceOperation);
         } else {
+            ServiceOperation operation = operationsMap.get(operationId);
             if (operation == null) {
                 log.warn("Operation with service id {} and operation id {} not found",
                         serviceId, serviceOperation.getOperationId());
             } else {
                 operation.setEndTime(serviceOperation.getEndTime());
                 operation.setError(serviceOperation.isError());
-                log.debug("Operation with service id {} and operation id {} was finished with {} status",
-                        serviceId, serviceOperation.getOperationId(), serviceOperation.isError() ? "error" : "success");
             }
         }
 
