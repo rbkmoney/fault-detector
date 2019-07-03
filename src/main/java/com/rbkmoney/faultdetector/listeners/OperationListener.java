@@ -25,11 +25,10 @@ public class OperationListener {
             String serviceId = serviceOperation.getServiceId();
             String operationId = serviceOperation.getOperationId();
             serviceOperations.addOperation(serviceId, operationId, serviceOperation);
-            log.debug("Operation for service '{}' with id '{}' was processed", serviceId);
         }
 
         // TODO: возможно стоит пересчитывать преагрегаты сразу после обновления мапы с операциями
-        log.trace("{} operations from kafka were obtained", serviceOperationsList.size());
+        log.debug("{} operations from kafka were obtained", serviceOperationsList.size());
     }
 
 }

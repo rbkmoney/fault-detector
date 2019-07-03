@@ -44,7 +44,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
         }
 
         ServiceSettings settings = serviceConfigMap.get(serviceId);
-        log.debug("Pre-aggergates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
+        log.debug("Pre-aggregates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
         servicePreAggregates.addPreAggregates(serviceId, preAggregates);
         servicePreAggregates.cleanPreAggregares(serviceId, settings);
     }

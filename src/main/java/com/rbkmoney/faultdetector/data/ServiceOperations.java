@@ -29,12 +29,13 @@ public class ServiceOperations {
                 operationsMap.put(operationId, serviceOperation);
                 log.debug("Operation with service id {} and operation id {} was added", serviceId, operationId);
             } else {
-                log.debug("For operation with service id {} and operation id {} was midified start time from {} to ",
+                log.debug("For operation with service id {} and operation id {} was modified start time from {} to {}",
                         serviceId, operationId, operation.getStartTime(), serviceOperation.getStartTime());
                 operation.setStartTime(serviceOperation.getStartTime());
                 operationsMap.put(operationId, operation);
             }
         } else {
+
             if (operation == null) {
                 log.warn("Operation with service id {} and operation id {} not found",
                         serviceId, serviceOperation.getOperationId());
@@ -42,7 +43,7 @@ public class ServiceOperations {
                 operation.setEndTime(serviceOperation.getEndTime());
                 operation.setError(serviceOperation.isError());
                 log.debug("Operation with service id {} and operation id {} was finished with {} status",
-                        serviceId, serviceOperation.getOperationId(), serviceOperation.isError() ? "error" : "success");
+                        serviceId, serviceOperation.getOperationId(), serviceOperation.isError() ? "ERROR" : "SUCCESS");
             }
         }
 
