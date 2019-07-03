@@ -25,7 +25,7 @@ public class ServiceOperations {
         ServiceOperation operation = operationsMap.get(operationId);
 
         if (serviceOperation.getEndTime() <= 0) {
-            if (operation == null) {	            operationsMap.put(operationId, serviceOperation);
+            if (operation == null) {
                 operationsMap.put(operationId, serviceOperation);
                 log.debug("Operation with service id {} and operation id {} was added", serviceId, operationId);
             } else {
