@@ -43,8 +43,10 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
             serviceOperationMap.remove(operationId);
         }
 
+        ServiceSettings settings = serviceConfigMap.get(serviceId);
+        log.debug("Pre-aggeregates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
         servicePreAggregates.addPreAggregates(serviceId, preAggregates);
-        servicePreAggregates.cleanPreAggregares(serviceId, serviceConfigMap.get(serviceId));
+        servicePreAggregates.cleanPreAggregares(serviceId, settings);
     }
 
     private String prepareOperation(ServiceOperation serviceOperation,
