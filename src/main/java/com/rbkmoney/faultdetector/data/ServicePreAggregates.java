@@ -21,7 +21,7 @@ public class ServicePreAggregates {
         }
         preAggregatesSet.add(preAggregates);
         servicePreAggregatesMap.put(serviceId, preAggregatesSet);
-        log.info("Pre-aggregates '{}' for service '{}' were added", serviceId, preAggregates);
+        log.info("Pre-aggregates '{}' for service '{}' were added", preAggregates, serviceId);
     }
 
     public void cleanPreAggregares(String serviceId, ServiceSettings settings) {
@@ -30,11 +30,11 @@ public class ServicePreAggregates {
             long currentTime = System.currentTimeMillis();
             long slidingWindow = settings.getSlidingWindow();
 
-            log. info("Clean pre-aggregates for service {} get started (sliding window - {}). " +
+            log.info("Clean pre-aggregates for service {} get started (sliding window - {}). " +
                     "Count of items before clean: {}", serviceId, slidingWindow,
                     preAggregates == null ? 0 : preAggregates.size());
             preAggregates.removeIf(preAggregate -> currentTime - preAggregate.getAggregationTime() > slidingWindow);
-            log. info("Clean pre-aggregates for service {} finished. Count of items after clean: {}",
+            log.info("Clean pre-aggregates for service {} finished. Count of items after clean: {}",
                     serviceId, preAggregates == null ? 0 : preAggregates.size());
         }
 
