@@ -27,7 +27,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
         Map<String, ServiceOperation> serviceOperationMap = serviceOperations.getServiceOperationsMap(serviceId);
         if (serviceOperationMap == null || serviceOperationMap.isEmpty()) {
             //TODO: вопрос на мульт - заполнять пустыми значениями или не делать ничего?
-            log.debug("The list of operations for the service {} is empty", serviceId);
+            log.info("The list of operations for the service {} is empty", serviceId);
             return;
         }
 
@@ -44,7 +44,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
         }
 
         ServiceSettings settings = serviceConfigMap.get(serviceId);
-        log.debug("Pre-aggregates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
+        log.info("Pre-aggregates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
         servicePreAggregates.addPreAggregates(serviceId, preAggregates);
         servicePreAggregates.cleanPreAggregares(serviceId, settings);
     }

@@ -20,15 +20,17 @@ public class OperationListener {
     public void listen(List<ServiceOperation> serviceOperationsList) {
         log.trace("Number of operations received from topic: {}", serviceOperationsList.size());
 
-        for (ServiceOperation serviceOperation : serviceOperationsList) {
+        try {
+            for (ServiceOperation serviceOperation : serviceOperationsList) {
 
-            String serviceId = serviceOperation.getServiceId();
-            String operationId = serviceOperation.getOperationId();
-            serviceOperations.addOperation(serviceId, operationId, serviceOperation);
+                String serviceId = serviceOperation.getServiceId();
+                String operationId = serviceOperation.getOperationId();
+                serviceOperations.addOperation(serviceId, operationId, serviceOperation);
+            }
+        } catch (Exception ex) {
+            log.error("Error received while processing data from kafka", ex);
         }
-
-        // TODO: возможно стоит пересчитывать преагрегаты сразу после обновления мапы с операциями
-        log.debug("{} operations from kafka were obtained", serviceOperationsList.size());
+        log.info("{} operations from kafka were obtained", serviceOperationsList.size());
     }
 
 }
