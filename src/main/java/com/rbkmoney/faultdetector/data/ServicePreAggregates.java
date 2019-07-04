@@ -1,10 +1,13 @@
 package com.rbkmoney.faultdetector.data;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
+@Slf4j
 public class ServicePreAggregates {
 
     private final Map<String, Set<PreAggregates>> servicePreAggregatesMap = new ConcurrentHashMap<>();
@@ -18,6 +21,7 @@ public class ServicePreAggregates {
         }
         preAggregatesSet.add(preAggregates);
         servicePreAggregatesMap.put(serviceId, preAggregatesSet);
+        log.info("Pre-aggregates '{}' for service '{}' were added", serviceId, preAggregates);
     }
 
     public void cleanPreAggregares(String serviceId, ServiceSettings settings) {
@@ -25,7 +29,13 @@ public class ServicePreAggregates {
             Set<PreAggregates> preAggregates = servicePreAggregatesMap.get(serviceId);
             long currentTime = System.currentTimeMillis();
             long slidingWindow = settings.getSlidingWindow();
+
+            log. info("Clean pre-aggregates for service {} get started (sliding window - {}). " +
+                    "Count of items before clean: {}", serviceId, slidingWindow,
+                    preAggregates == null ? 0 : preAggregates.size());
             preAggregates.removeIf(preAggregate -> currentTime - preAggregate.getAggregationTime() > slidingWindow);
+            log. info("Clean pre-aggregates for service {} finished. Count of items after clean: {}",
+                    serviceId, preAggregates == null ? 0 : preAggregates.size());
         }
 
         if (servicePreAggregatesMap.get(serviceId).isEmpty()) {
