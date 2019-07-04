@@ -27,15 +27,15 @@ public class ServicePreAggregates {
     public void cleanPreAggregares(String serviceId, ServiceSettings settings) {
         if (servicePreAggregatesMap.containsKey(serviceId)) {
             Set<PreAggregates> preAggregates = servicePreAggregatesMap.get(serviceId);
-            long currentTime = System.currentTimeMillis();
-            long slidingWindow = settings.getSlidingWindow();
-
-            log.info("Clean pre-aggregates for service {} get started (sliding window - {}). " +
-                    "Count of items before clean: {}", serviceId, slidingWindow,
-                    preAggregates == null ? 0 : preAggregates.size());
-            preAggregates.removeIf(preAggregate -> currentTime - preAggregate.getAggregationTime() > slidingWindow);
-            log.info("Clean pre-aggregates for service {} finished. Count of items after clean: {}",
-                    serviceId, preAggregates == null ? 0 : preAggregates.size());
+            if (preAggregates != null) {
+                long currentTime = System.currentTimeMillis();
+                long slidingWindow = settings.getSlidingWindow();
+                log.info("Clean pre-aggregates for service {} get started (sliding window - {}). " +
+                                "Count of items before clean: {}", serviceId, slidingWindow, preAggregates.size());
+                preAggregates.removeIf(preAggregate -> currentTime - preAggregate.getAggregationTime() > slidingWindow);
+                log.info("Clean pre-aggregates for service {} finished. Count of items after clean: {}",
+                        serviceId, preAggregates.size());
+            }
         }
 
         if (servicePreAggregatesMap.get(serviceId).isEmpty()) {
