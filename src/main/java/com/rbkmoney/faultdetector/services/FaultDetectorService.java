@@ -46,21 +46,23 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
     }
 
     @Override
-    public void registerOperation(String serviceId,
-                                  Operation operation,
-                                  ServiceConfig serviceConfig) throws ServiceNotFoundException, TException {
+    public void registerOperation(String serviceId, Operation operation, ServiceConfig serviceConfig)
+            throws ServiceNotFoundException, TException {
         log.info("Start registration operation {} for service {}", operation, serviceId);
         if (!serviceConfigMap.containsKey(serviceId) || !serviceOperations.containsService(serviceId)) {
             log.error("Service {} is not initialized", serviceId);
             throw new ServiceNotFoundException();
         }
-
-        try {
-            setServiceSettings(serviceId, serviceConfig);
-            sendOperationHandler.handle(transformOperation(serviceId, operation));
-            log.info("Registration operation {} for service {} finished", operation, serviceId);
-        } catch (Exception e) {
-            log.error("Error while registration operation", e);
+        if (isEmptyOperation(operation)) {
+            log.error("Received empty operation for service '{}'", serviceId);
+        } else {
+            try {
+                setServiceSettings(serviceId, serviceConfig);
+                sendOperationHandler.handle(transformOperation(serviceId, operation));
+                log.info("Registration operation {} for service {} finished", operation, serviceId);
+            } catch (Exception e) {
+                log.error("Error while registration operation", e);
+            }
         }
     }
 
@@ -89,7 +91,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
 
     @Override
     public List<ServiceStatistics> getStatistics(List<String> services) throws TException {
-        log.info("Check statictics for the services {}", services);
+        log.info("Check statistics for the services {}", services);
         List<ServiceStatistics> serviceStatisticsList = new ArrayList<>();
 
         try {
@@ -117,10 +119,23 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
 
     private void clearUnusualAggregates() {
         for (String serviceId : aggregatesMap.keySet()) {
-            long slidingWindow = serviceConfigMap.get(serviceId).getSlidingWindow();
-            if (System.currentTimeMillis() - aggregatesMap.get(serviceId).getAggregateTime() > slidingWindow) {
-                aggregatesMap.remove(serviceId);
+            ServiceSettings serviceSettings = serviceConfigMap.get(serviceId);
+            ServiceAggregates serviceAggregates = aggregatesMap.get(serviceId);
+            if (serviceSettings != null && serviceAggregates != null) {
+                long slidingWindow = serviceSettings.getSlidingWindow();
+                if (System.currentTimeMillis() - serviceAggregates.getAggregateTime() > slidingWindow) {
+                    aggregatesMap.remove(serviceId);
+                }
             }
+
+        }
+    }
+
+    private static boolean isEmptyOperation(Operation operation) {
+        if (operation == null || operation.getOperationId() == null || operation.getState() == null) {
+            return true;
+        } else {
+            return false;
         }
     }
 
