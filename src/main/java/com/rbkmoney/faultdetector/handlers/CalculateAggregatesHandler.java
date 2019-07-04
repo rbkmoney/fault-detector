@@ -25,39 +25,43 @@ public class CalculateAggregatesHandler implements Handler<String> {
         if (preAggregatesSet == null || preAggregatesSet.isEmpty()) {
             return;
         }
-        log.info("Count of pre-aggregates for service {}", preAggregatesSet.size());
 
         int weight = 0;
         double failureRateSum = 0;
         long weightSum = 0;
+        long aggregationTime = System.currentTimeMillis();
+        log.info("Count of pre-aggregates for service {}: {}. Time label: {}", serviceId,
+                preAggregatesSet.size(), aggregationTime);
+
         for (PreAggregates preAggregates : preAggregatesSet) {
             weight++;
             int overtimeOperationsCount = preAggregates.getOvertimeOperationsCount();
             int errorOperationsCount = preAggregates.getErrorOperationsCount();
             int failureOperationsCount = errorOperationsCount + overtimeOperationsCount;
-            failureRateSum += ((double) failureOperationsCount / preAggregates.getOperationsCount()) * weight;
+            double failureRate = ((double) failureOperationsCount / preAggregates.getOperationsCount()) * weight;
+            failureRateSum += failureRate;
             weightSum += weight;
-            if (failureOperationsCount > 0) {
-                log.info("For the service '{}' in the pre-aggregate '{}': overtimeOperationsCount - {}, " +
-                                "errorOperationsCount - {}, total - {}. A weight of the failure rate: {}",
-                        serviceId, preAggregates.getAggregationTime(), overtimeOperationsCount,
-                        errorOperationsCount, preAggregates.getOperationsCount(), weight);
-            }
+            log.info("Step pre-aggregation {} for the service '{}'. Params: overtimeOperationsCount - {}, " +
+                            "errorOperationsCount - {}, operationsCount - {}, failureRate - {}, failureRateSum - {}, " +
+                            "weightSum - {}. Time label: {} ", weight, serviceId, overtimeOperationsCount,
+                    errorOperationsCount, preAggregates.getOperationsCount(), failureRate, failureRateSum, weightSum,
+                    aggregationTime);
         }
 
         double failureRate = weightSum == 0 ? 0 : failureRateSum / weightSum;
 
-        ServiceAggregates serviceAggregates = getServiceAggregates(serviceId, failureRate, preAggregatesSet);
+        ServiceAggregates serviceAggregates = getServiceAggregates(serviceId, failureRate, preAggregatesSet, aggregationTime);
         serviceAggregatesMap.put(serviceId, serviceAggregates);
         log.info("Processing the service statistics for service {} was finished", serviceId);
     }
 
     private ServiceAggregates getServiceAggregates(String serviceId,
                                                    double failureRate,
-                                                   Set<PreAggregates> preAggregatesSet) {
+                                                   Set<PreAggregates> preAggregatesSet,
+                                                   long aggregationTime) {
         ServiceAggregates serviceAggregates = new ServiceAggregates();
         serviceAggregates.setServiceId(serviceId);
-        serviceAggregates.setAggregateTime(System.currentTimeMillis());
+        serviceAggregates.setAggregateTime(aggregationTime);
         serviceAggregates.setFailureRate(failureRate);
 
         long totalSuccessOpers = preAggregatesSet.stream()
