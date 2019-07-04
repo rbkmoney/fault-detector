@@ -27,22 +27,21 @@ public class ServiceOperations {
         if (serviceOperation.getEndTime() <= 0) {
             if (operation == null) {
                 operationsMap.put(operationId, serviceOperation);
-                log.debug("Operation with service id {} and operation id {} was added", serviceId, operationId);
+                log.info("New operation with service id {} and operation id {} was added", serviceId, operationId);
             } else {
-                log.debug("For operation with service id {} and operation id {} was modified start time from {} to {}",
+                log.info("For operation with service id {} and operation id {} was modified start time from {} to {}",
                         serviceId, operationId, operation.getStartTime(), serviceOperation.getStartTime());
                 operation.setStartTime(serviceOperation.getStartTime());
                 operationsMap.put(operationId, operation);
             }
         } else {
-
             if (operation == null) {
                 log.warn("Operation with service id {} and operation id {} not found",
                         serviceId, serviceOperation.getOperationId());
             } else {
                 operation.setEndTime(serviceOperation.getEndTime());
                 operation.setError(serviceOperation.isError());
-                log.debug("Operation with service id {} and operation id {} was finished with {} status",
+                log.info("Operation with service id {} and operation id {} was finished with {} status",
                         serviceId, serviceOperation.getOperationId(), serviceOperation.isError() ? "ERROR" : "SUCCESS");
             }
         }

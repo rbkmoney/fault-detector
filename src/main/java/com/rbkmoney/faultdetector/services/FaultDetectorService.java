@@ -55,13 +55,12 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
             throw new ServiceNotFoundException();
         }
 
-        setServiceSettings(serviceId, serviceConfig);
-
         try {
+            setServiceSettings(serviceId, serviceConfig);
             sendOperationHandler.handle(transformOperation(serviceId, operation));
             log.info("Registration operation {} for service {} finished", operation, serviceId);
         } catch (Exception e) {
-            log.error("Error sending data", e);
+            log.error("Error while registration operation", e);
         }
     }
 
@@ -93,22 +92,26 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
         log.info("Check statictics for the services {}", services);
         List<ServiceStatistics> serviceStatisticsList = new ArrayList<>();
 
-        for (String serviceId : services) {
-            calculateAggregatesHandler.handle(serviceId);
-            ServiceAggregates aggregates = aggregatesMap.get(serviceId);
-            if (aggregates != null) {
-                ServiceStatistics stat = new ServiceStatistics();
-                stat.setServiceId(aggregates.getServiceId());
-                stat.setFailureRate(aggregates.getFailureRate());
-                stat.setOperationsCount(aggregates.getOperationsCount());
-                stat.setErrorOperationsCount(aggregates.getErrorOperationsCount());
-                stat.setSuccessOperationsCount(aggregates.getSuccessOperationsCount());
-                serviceStatisticsList.add(stat);
+        try {
+            for (String serviceId : services) {
+                calculateAggregatesHandler.handle(serviceId);
+                ServiceAggregates aggregates = aggregatesMap.get(serviceId);
+                if (aggregates != null) {
+                    ServiceStatistics stat = new ServiceStatistics();
+                    stat.setServiceId(aggregates.getServiceId());
+                    stat.setFailureRate(aggregates.getFailureRate());
+                    stat.setOperationsCount(aggregates.getOperationsCount());
+                    stat.setErrorOperationsCount(aggregates.getErrorOperationsCount());
+                    stat.setSuccessOperationsCount(aggregates.getSuccessOperationsCount());
+                    serviceStatisticsList.add(stat);
+                }
             }
+            clearUnusualAggregates();
+        } catch (Exception ex) {
+            log.error("Received error during processing of statistics", ex);
         }
 
-        clearUnusualAggregates();
-        log.debug("Statistic for services: {}", serviceStatisticsList);
+        log.info("Statistic for services: {}", serviceStatisticsList);
         return serviceStatisticsList;
     }
 
