@@ -26,7 +26,7 @@ public class OperationListener {
                 String serviceId = serviceOperation.getServiceId();
                 String operationId = serviceOperation.getOperationId();
 
-                log.info("Operation with service id '{}' and operation id '{}' obtained from kafka", serviceId, operationId);
+                log.info("Operation with service id '{}' and operation '{}' obtained from kafka", serviceId, serviceOperation);
                 serviceOperations.addOperation(serviceId, operationId, serviceOperation);
             }
         } catch (Exception ex) {

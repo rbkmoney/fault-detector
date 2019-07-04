@@ -48,7 +48,6 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
     @Override
     public void registerOperation(String serviceId, Operation operation, ServiceConfig serviceConfig)
             throws ServiceNotFoundException, TException {
-        log.info("Start registration operation {} for service {}", operation, serviceId);
         if (!serviceConfigMap.containsKey(serviceId) || !serviceOperations.containsService(serviceId)) {
             log.error("Service {} is not initialized", serviceId);
             throw new ServiceNotFoundException();
@@ -59,7 +58,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
             try {
                 setServiceSettings(serviceId, serviceConfig);
                 sendOperationHandler.handle(transformOperation(serviceId, operation));
-                log.info("Registration operation {} for service {} finished", operation, serviceId);
+                log.info("Registration operation '{}' for service '{}' finished", operation, serviceId);
             } catch (Exception e) {
                 log.error("Error while registration operation", e);
             }

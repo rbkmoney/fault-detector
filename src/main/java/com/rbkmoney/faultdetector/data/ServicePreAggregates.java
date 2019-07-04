@@ -30,10 +30,10 @@ public class ServicePreAggregates {
             if (preAggregates != null) {
                 long currentTime = System.currentTimeMillis();
                 long slidingWindow = settings.getSlidingWindow();
-                log.info("Clean pre-aggregates for service {} get started (sliding window - {}). " +
+                log.info("Clean pre-aggregates for service '{}' get started (sliding window - {}). " +
                                 "Count of items before clean: {}", serviceId, slidingWindow, preAggregates.size());
                 preAggregates.removeIf(preAggregate -> currentTime - preAggregate.getAggregationTime() > slidingWindow);
-                log.info("Clean pre-aggregates for service {} finished. Count of items after clean: {}",
+                log.info("Clean pre-aggregates for service '{}' finished. Count of items after clean: {}",
                         serviceId, preAggregates.size());
             }
         }

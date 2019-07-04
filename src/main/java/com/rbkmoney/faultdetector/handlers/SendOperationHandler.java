@@ -19,7 +19,7 @@ public class SendOperationHandler implements Handler<ServiceOperation> {
 
     @Override
     public void handle(ServiceOperation serviceOperation) {
-        kafkaTemplate.send(topicName, serviceOperation);
+        kafkaTemplate.send(topicName, serviceOperation.getOperationId(), serviceOperation);
     }
 
 }

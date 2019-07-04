@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -19,7 +20,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
 
     @Override
     public void handle(String serviceId) {
-        log.info("Start processing the service statistics for service {}", serviceId);
+        log.info("Start processing the service statistics for service '{}'", serviceId);
         Set<PreAggregates> preAggregatesSet = servicePreAggregates.getPreAggregatesSet(serviceId);
 
         if (preAggregatesSet == null || preAggregatesSet.isEmpty()) {
@@ -30,7 +31,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
         double failureRateSum = 0;
         long weightSum = 0;
         long aggregationTime = System.currentTimeMillis();
-        log.info("Count of pre-aggregates for service {}: {}. Time label: {}", serviceId,
+        log.info("Count of pre-aggregates for service '{}': {}. Time label: {}", serviceId,
                 preAggregatesSet.size(), aggregationTime);
 
         for (PreAggregates preAggregates : preAggregatesSet) {
@@ -52,7 +53,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
 
         ServiceAggregates serviceAggregates = getServiceAggregates(serviceId, failureRate, preAggregatesSet, aggregationTime);
         serviceAggregatesMap.put(serviceId, serviceAggregates);
-        log.info("Processing the service statistics for service {} was finished", serviceId);
+        log.info("Processing the service statistics for service '{}' was finished", serviceId);
     }
 
     private ServiceAggregates getServiceAggregates(String serviceId,
@@ -67,20 +68,48 @@ public class CalculateAggregatesHandler implements Handler<String> {
         long totalSuccessOpers = preAggregatesSet.stream()
                 .mapToLong(aggr -> aggr.getSuccessOperationsCount())
                 .sum();
-        serviceAggregates.setSuccessOperationsCount(totalSuccessOpers);
+        serviceAggregates.setTotalSuccessOperationsCount(totalSuccessOpers);
 
         long totalErrorOpers = preAggregatesSet.stream()
                 .mapToLong(aggr -> aggr.getErrorOperationsCount())
                 .sum();
-        serviceAggregates.setErrorOperationsCount(totalErrorOpers);
+        serviceAggregates.setTotalErrorOperationsCount(totalErrorOpers);
 
         PreAggregates lastPreAggregates = preAggregatesSet.stream()
                 .max(Comparator.comparingLong(agg -> agg.getAggregationTime()))
                 .orElse(new PreAggregates());
-        serviceAggregates.setOperationsCount(lastPreAggregates.getRunningOperationsCount() +
+        serviceAggregates.setTotalOperationsCount(lastPreAggregates.getRunningOperationsCount() +
                 lastPreAggregates.getOvertimeOperationsCount() + totalSuccessOpers + totalErrorOpers);
-        log.info("Aggregates for service {}: {}", serviceId, serviceAggregates);
+        serviceAggregates.setOperationsCount(lastPreAggregates.getOperationsCount());
+        serviceAggregates.setErrorOperationsCount(lastPreAggregates.getErrorOperationsCount());
+        serviceAggregates.setSuccessOperationsCount(lastPreAggregates.getSuccessOperationsCount());
+        serviceAggregates.setOvertimeOperationsCount(lastPreAggregates.getOvertimeOperationsCount());
+
+        String delimiter = ", ";
+        serviceAggregates.setOperationsCountProgressiveLine(getOperationsCountProgressiveLine(preAggregatesSet, delimiter));
+        serviceAggregates.setErrorOperationsProgressiveLine(getErrorOperationsProgressiveLine(preAggregatesSet, delimiter));
+        serviceAggregates.setOvertimeOperationsProgressiveLine(getOvertimeOperationsProgressiveLine(preAggregatesSet, delimiter));
+
+        log.info("Aggregates for service id '{}': {}", serviceId, serviceAggregates);
         return serviceAggregates;
+    }
+
+    private String getOvertimeOperationsProgressiveLine(Set<PreAggregates> preAggregatesSet, String delimiter) {
+        return preAggregatesSet.stream()
+                .map(agg -> String.valueOf(agg.getOperationsCount()))
+                .collect(Collectors.joining(delimiter));
+    }
+
+    private String getErrorOperationsProgressiveLine(Set<PreAggregates> preAggregatesSet, String delimiter) {
+        return preAggregatesSet.stream()
+                .map(agg -> String.valueOf(agg.getErrorOperationsCount()))
+                .collect(Collectors.joining(delimiter));
+    }
+
+    private String getOperationsCountProgressiveLine(Set<PreAggregates> preAggregatesSet, String delimiter) {
+        return preAggregatesSet.stream()
+                .map(agg -> String.valueOf(agg.getOperationsCount()))
+                .collect(Collectors.joining(delimiter));
     }
 
 }
