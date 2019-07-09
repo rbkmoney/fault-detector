@@ -27,6 +27,10 @@ public class PreAggregatesRepository implements CrudRepository<PreAggregates> {
     @Value("${clickhouse.db.writeStatistic}")
     private boolean writeStatistic;
 
+    private static final String SCHEME_NAME = "fault_detector";
+
+    private static final String TABLE_NAME = "pre_aggregates";
+
     private static final String INSERT = "INSERT INTO fault_detector.pre_aggregates " +
             "(timestamp, serviceId, operationsCount, runningOperationsCount, overtimeOperationsCount, " +
             "errorOperationsCount, successOperationsCount, operationTimeLimit, slidingWindow, preAggregationSize)" +
@@ -37,8 +41,8 @@ public class PreAggregatesRepository implements CrudRepository<PreAggregates> {
         if (writeStatistic && preAggregates != null) {
             Map<String, Object> parameters = generateParamsByFraudModel(preAggregates);
             SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getDataSource())
-                    .withSchemaName("fault_detector")
-                    .withTableName("pre_aggregates");
+                    .withSchemaName(SCHEME_NAME)
+                    .withTableName(TABLE_NAME);
             simpleJdbcInsert.setColumnNames(Lists.newArrayList(parameters.keySet()));
             simpleJdbcInsert.execute(parameters);
         }

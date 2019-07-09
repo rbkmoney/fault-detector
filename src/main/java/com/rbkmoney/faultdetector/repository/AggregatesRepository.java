@@ -26,6 +26,10 @@ public class AggregatesRepository implements CrudRepository<ServiceAggregates> {
     @Value("${clickhouse.db.writeStatistic}")
     private boolean writeStatistic;
 
+    private static final String SCHEME_NAME = "fault_detector";
+
+    private static final String TABLE_NAME = "aggregates";
+
     private static final String INSERT = "INSERT INTO fault_detector.aggregates " +
             "(timestamp, serviceId, failureRate, operationsCount, successOperationsCount, " +
             "errorOperationsCount, overtimeOperationsCount)" +
@@ -36,8 +40,8 @@ public class AggregatesRepository implements CrudRepository<ServiceAggregates> {
         if (writeStatistic && preAggregates != null) {
             Map<String, Object> parameters = generateParams(preAggregates);
             SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getDataSource())
-                    .withSchemaName("fault_detector")
-                    .withTableName("aggregates");
+                    .withSchemaName(SCHEME_NAME)
+                    .withTableName(TABLE_NAME);
             simpleJdbcInsert.setColumnNames(Lists.newArrayList(parameters.keySet()));
             simpleJdbcInsert.execute(parameters);
         }
