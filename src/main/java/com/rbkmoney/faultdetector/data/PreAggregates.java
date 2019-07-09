@@ -10,6 +10,8 @@ public class PreAggregates implements Comparable<PreAggregates> {
 
     private Long aggregationTime;
 
+    private String serviceId;
+
     private int operationsCount;
 
     private int runningOperationsCount;
@@ -19,6 +21,12 @@ public class PreAggregates implements Comparable<PreAggregates> {
     private int errorOperationsCount;
 
     private int successOperationsCount;
+
+    private int operationTimeLimit;
+
+    private int slidingWindow;
+
+    private int preAggregationSize;
 
     public void addRunningOperation() {
         runningOperationsCount++;

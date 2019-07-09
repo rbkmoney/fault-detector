@@ -41,6 +41,12 @@ kafka:
   consumer:
     concurrency: 1
 
+clickhouse.db:
+  url: "jdbc:clickhouse://localhost:8123/default"
+  user: "user"
+  password: "password"
+  writeStatistic: true
+
 management:
   security:
     flag: false
