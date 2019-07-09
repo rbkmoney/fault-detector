@@ -1,6 +1,7 @@
 package com.rbkmoney.faultdetector.handlers;
 
 import com.rbkmoney.faultdetector.data.*;
+import com.rbkmoney.faultdetector.repository.CrudRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,8 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
 
     private final Map<String, ServiceSettings> serviceConfigMap;
 
+    private final CrudRepository<PreAggregates> preAggregatesRepository;
+
     private static final String EMPTY_STRING = "";
 
     @Override
@@ -35,6 +38,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
 
         PreAggregates preAggregates = new PreAggregates();
         preAggregates.setAggregationTime(currentTimeMillis);
+        preAggregates.setServiceId(serviceId);
         preAggregates.setOperationsCount(serviceOperationMap.size());
 
         ServiceSettings serviceSettings = serviceSettingsMap.get(serviceId);
@@ -46,6 +50,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
         ServiceSettings settings = serviceConfigMap.get(serviceId);
         log.info("Pre-aggregates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
         servicePreAggregates.addPreAggregates(serviceId, preAggregates);
+        preAggregatesRepository.insert(preAggregates);
         servicePreAggregates.cleanPreAggregares(serviceId, settings);
     }
 
