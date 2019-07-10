@@ -29,8 +29,6 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
 
     private final Handler<ServiceOperation> sendOperationHandler;
 
-    private final Handler<String> calculateAggregatesHandler;
-
     private final ServiceOperations serviceOperations;
 
     @Override
@@ -95,7 +93,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
 
         try {
             for (String serviceId : services) {
-                calculateAggregatesHandler.handle(serviceId);
+
                 ServiceAggregates aggregates = aggregatesMap.get(serviceId);
                 if (aggregates != null) {
                     ServiceStatistics stat = new ServiceStatistics();

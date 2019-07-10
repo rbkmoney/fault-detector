@@ -21,6 +21,8 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
 
     private final Map<String, ServiceSettings> serviceConfigMap;
 
+    private final Handler<String> calculateAggregatesHandler;
+
     private final CrudRepository<PreAggregates> preAggregatesRepository;
 
     private static final String EMPTY_STRING = "";
@@ -51,6 +53,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
         log.info("Pre-aggregates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
         servicePreAggregates.addPreAggregates(serviceId, preAggregates);
         preAggregatesRepository.insert(preAggregates);
+        calculateAggregatesHandler.handle(serviceId);
         servicePreAggregates.cleanPreAggregares(serviceId, settings);
     }
 

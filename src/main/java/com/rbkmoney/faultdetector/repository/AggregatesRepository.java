@@ -2,18 +2,15 @@ package com.rbkmoney.faultdetector.repository;
 
 import com.google.common.collect.Lists;
 import com.rbkmoney.faultdetector.data.ServiceAggregates;
-import com.rbkmoney.faultdetector.repository.setter.AggregatesBatchPreparedStatementSetter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -30,11 +27,6 @@ public class AggregatesRepository implements CrudRepository<ServiceAggregates> {
 
     private static final String TABLE_NAME = "aggregates";
 
-    private static final String INSERT = "INSERT INTO fault_detector.aggregates " +
-            "(timestamp, serviceId, failureRate, operationsCount, successOperationsCount, " +
-            "errorOperationsCount, overtimeOperationsCount)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?)";
-
     @Override
     public void insert(ServiceAggregates preAggregates) {
         if (writeStatistic && preAggregates != null) {
@@ -44,13 +36,6 @@ public class AggregatesRepository implements CrudRepository<ServiceAggregates> {
                     .withTableName(TABLE_NAME);
             simpleJdbcInsert.setColumnNames(Lists.newArrayList(parameters.keySet()));
             simpleJdbcInsert.execute(parameters);
-        }
-    }
-
-    @Override
-    public void insertBatch(List<ServiceAggregates> aggregatesList) {
-        if (writeStatistic && aggregatesList != null && !aggregatesList.isEmpty()) {
-            jdbcTemplate.batchUpdate(INSERT, new AggregatesBatchPreparedStatementSetter(aggregatesList));
         }
     }
 

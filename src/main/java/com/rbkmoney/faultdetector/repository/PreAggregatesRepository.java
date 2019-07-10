@@ -2,19 +2,15 @@ package com.rbkmoney.faultdetector.repository;
 
 import com.google.common.collect.Lists;
 import com.rbkmoney.faultdetector.data.PreAggregates;
-import com.rbkmoney.faultdetector.repository.setter.PreAggregatesBatchPreparedStatementSetter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -31,11 +27,6 @@ public class PreAggregatesRepository implements CrudRepository<PreAggregates> {
 
     private static final String TABLE_NAME = "pre_aggregates";
 
-    private static final String INSERT = "INSERT INTO fault_detector.pre_aggregates " +
-            "(timestamp, serviceId, operationsCount, runningOperationsCount, overtimeOperationsCount, " +
-            "errorOperationsCount, successOperationsCount, operationTimeLimit, slidingWindow, preAggregationSize)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
     @Override
     public void insert(PreAggregates preAggregates) {
         if (writeStatistic && preAggregates != null) {
@@ -45,13 +36,6 @@ public class PreAggregatesRepository implements CrudRepository<PreAggregates> {
                     .withTableName(TABLE_NAME);
             simpleJdbcInsert.setColumnNames(Lists.newArrayList(parameters.keySet()));
             simpleJdbcInsert.execute(parameters);
-        }
-    }
-
-    @Override
-    public void insertBatch(List<PreAggregates> preAggregatesList) {
-        if (writeStatistic && preAggregatesList != null && !preAggregatesList.isEmpty()) {
-            jdbcTemplate.batchUpdate(INSERT, new PreAggregatesBatchPreparedStatementSetter(preAggregatesList));
         }
     }
 

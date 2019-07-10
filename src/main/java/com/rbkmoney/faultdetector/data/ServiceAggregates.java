@@ -26,10 +26,4 @@ public class ServiceAggregates {
 
     private long overtimeOperationsCount;
 
-    private String overtimeOperationsProgressiveLine;
-
-    private String errorOperationsProgressiveLine;
-
-    private String operationsCountProgressiveLine;
-
 }

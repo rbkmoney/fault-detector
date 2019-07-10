@@ -1,6 +1,7 @@
 package com.rbkmoney.faultdetector.handlers;
 
 import com.rbkmoney.faultdetector.data.*;
+import com.rbkmoney.faultdetector.repository.CrudRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,6 +18,8 @@ public class CalculateAggregatesHandler implements Handler<String> {
     private final Map<String, ServiceAggregates> serviceAggregatesMap;
 
     private final ServicePreAggregates servicePreAggregates;
+
+    private final CrudRepository<ServiceAggregates> aggregatesRepository;
 
     @Override
     public void handle(String serviceId) {
@@ -53,6 +56,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
 
         ServiceAggregates serviceAggregates = getServiceAggregates(serviceId, failureRate, preAggregatesSet, aggregationTime);
         serviceAggregatesMap.put(serviceId, serviceAggregates);
+        aggregatesRepository.insert(serviceAggregates);
         log.info("Processing the service statistics for service '{}' was finished", serviceId);
     }
 
@@ -85,31 +89,8 @@ public class CalculateAggregatesHandler implements Handler<String> {
         serviceAggregates.setSuccessOperationsCount(lastPreAggregates.getSuccessOperationsCount());
         serviceAggregates.setOvertimeOperationsCount(lastPreAggregates.getOvertimeOperationsCount());
 
-        String delimiter = ", ";
-        serviceAggregates.setOperationsCountProgressiveLine(getOperationsCountProgressiveLine(preAggregatesSet, delimiter));
-        serviceAggregates.setErrorOperationsProgressiveLine(getErrorOperationsProgressiveLine(preAggregatesSet, delimiter));
-        serviceAggregates.setOvertimeOperationsProgressiveLine(getOvertimeOperationsProgressiveLine(preAggregatesSet, delimiter));
-
         log.info("Aggregates for service id '{}': {}", serviceId, serviceAggregates);
         return serviceAggregates;
-    }
-
-    private String getOvertimeOperationsProgressiveLine(Set<PreAggregates> preAggregatesSet, String delimiter) {
-        return preAggregatesSet.stream()
-                .map(agg -> String.valueOf(agg.getOperationsCount()))
-                .collect(Collectors.joining(delimiter));
-    }
-
-    private String getErrorOperationsProgressiveLine(Set<PreAggregates> preAggregatesSet, String delimiter) {
-        return preAggregatesSet.stream()
-                .map(agg -> String.valueOf(agg.getErrorOperationsCount()))
-                .collect(Collectors.joining(delimiter));
-    }
-
-    private String getOperationsCountProgressiveLine(Set<PreAggregates> preAggregatesSet, String delimiter) {
-        return preAggregatesSet.stream()
-                .map(agg -> String.valueOf(agg.getOperationsCount()))
-                .collect(Collectors.joining(delimiter));
     }
 
 }
