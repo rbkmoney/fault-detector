@@ -25,15 +25,17 @@ public class FaultDetectorMetrics {
 
     private Map<String, List<Gauge>> aggregatesMetricsMap = new HashMap<>();
 
-    private static final String FAILURE_GAUGE_NAME = "fault.detector.aggregate.failure.rate.";
+    private static final String GAUGE_PREFEX = "fault.detector.aggregate.";
 
-    private static final String OPER_COUNT_GAUGE_NAME = "fault.detector.aggregate.operations.count.";
+    private static final String FAILURE_GAUGE_NAME = GAUGE_PREFEX + "failure.rate.";
 
-    private static final String SUCCESS_OPER_COUNT_GAUGE_NAME = "fault.detector.aggregate.success.operations.count.";
+    private static final String OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "operations.count.";
 
-    private static final String ERROR_OPER_COUNT_GAUGE_NAME = "fault.detector.aggregate.error.operations.count.";
+    private static final String SUCCESS_OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "success.count.";
 
-    private static final String OVERTIME_OPER_COUNT_GAUGE_NAME = "fault.detector.aggregate.error.operations.count.";
+    private static final String ERROR_OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "error.count.";
+
+    private static final String OVERTIME_OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "overtime.count.";
 
     private static final String BASE_UNIT = "value";
 
