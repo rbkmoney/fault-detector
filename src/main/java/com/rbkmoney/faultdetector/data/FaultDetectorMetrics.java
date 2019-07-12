@@ -25,47 +25,54 @@ public class FaultDetectorMetrics {
 
     private Map<String, List<Gauge>> aggregatesMetricsMap = new HashMap<>();
 
+    private static final String FAILURE_GAUGE_NAME = "fault.detector.aggregate.failure.rate.";
+
+    private static final String OPER_COUNT_GAUGE_NAME = "fault.detector.aggregate.operations.count.";
+
+    private static final String SUCCESS_OPER_COUNT_GAUGE_NAME = "fault.detector.aggregate.success.operations.count.";
+
+    private static final String ERROR_OPER_COUNT_GAUGE_NAME = "fault.detector.aggregate.error.operations.count.";
+
+    private static final String OVERTIME_OPER_COUNT_GAUGE_NAME = "fault.detector.aggregate.error.operations.count.";
+
+    private static final String BASE_UNIT = "value";
+
     public void addAggregatesMetrics(String serviceId) {
         List<Gauge> aggregatesMetricsList = new CopyOnWriteArrayList<>();
         ServiceAggregates serviceAggregates = aggregatesMap.get(serviceId);
 
-        String failureGaugeName = "fault.detector.aggregate.failure.rate." + serviceId;
-        Gauge failureGaude = Gauge.builder(failureGaugeName, serviceAggregates, (aggregates) -> aggregates.getFailureRate())
+        Gauge failureGaude = Gauge.builder(FAILURE_GAUGE_NAME, serviceAggregates, ServiceAggregates::getFailureRate)
                 .tags(emptyList())
                 .description("The value of the availability metric for the service " + serviceId)
-                .baseUnit("value")
+                .baseUnit(BASE_UNIT)
                 .register(registry);
         aggregatesMetricsList.add(failureGaude);
 
-        String operCountGaugeName = "fault.detector.aggregate.operations.count." + serviceId;
-        Gauge operCountGaude = Gauge.builder(operCountGaugeName, serviceAggregates, (aggregates) -> aggregates.getOperationsCount())
+        Gauge operCountGaude = Gauge.builder(OPER_COUNT_GAUGE_NAME, serviceAggregates, ServiceAggregates::getOperationsCount)
                 .tags(emptyList())
                 .description("The value of operations count for the service " + serviceId)
-                .baseUnit("value")
+                .baseUnit(BASE_UNIT)
                 .register(registry);
         aggregatesMetricsList.add(operCountGaude);
 
-        String successOperCountGaugeName = "fault.detector.aggregate.success.operations.count." + serviceId;
-        Gauge successOperCountGaude = Gauge.builder(successOperCountGaugeName, serviceAggregates, (aggregates) -> aggregates.getSuccessOperationsCount())
+        Gauge successOperCountGaude = Gauge.builder(SUCCESS_OPER_COUNT_GAUGE_NAME, serviceAggregates, ServiceAggregates::getSuccessOperationsCount)
                 .tags(emptyList())
                 .description("The value of success operations count for the service " + serviceId)
-                .baseUnit("value")
+                .baseUnit(BASE_UNIT)
                 .register(registry);
         aggregatesMetricsList.add(successOperCountGaude);
 
-        String errorOperCountGaugeName = "fault.detector.aggregate.error.operations.count." + serviceId;
-        Gauge errorOperCountGaude = Gauge.builder(errorOperCountGaugeName, serviceAggregates, (aggregates) -> aggregates.getErrorOperationsCount())
+        Gauge errorOperCountGaude = Gauge.builder(ERROR_OPER_COUNT_GAUGE_NAME, serviceAggregates, ServiceAggregates::getErrorOperationsCount)
                 .tags(emptyList())
                 .description("The value of error operations count for the service " + serviceId)
-                .baseUnit("value")
+                .baseUnit(BASE_UNIT)
                 .register(registry);
         aggregatesMetricsList.add(errorOperCountGaude);
 
-        String overtimeOperCountGaugeName = "fault.detector.aggregate.error.operations.count." + serviceId;
-        Gauge overtimeOperCountGaude = Gauge.builder(overtimeOperCountGaugeName, serviceAggregates, (aggregates) -> aggregates.getErrorOperationsCount())
+        Gauge overtimeOperCountGaude = Gauge.builder(OVERTIME_OPER_COUNT_GAUGE_NAME, serviceAggregates, (aggregates) -> aggregates.getErrorOperationsCount())
                 .tags(emptyList())
                 .description("The value of overtime operations count for the service " + serviceId)
-                .baseUnit("value")
+                .baseUnit(BASE_UNIT)
                 .register(registry);
         aggregatesMetricsList.add(overtimeOperCountGaude);
 
