@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import static java.util.Collections.emptyList;
 
 @Slf4j
-//@Component
+@Component
 @RequiredArgsConstructor
 public class FaultDetectorMetrics {
 
