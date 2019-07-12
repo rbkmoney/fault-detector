@@ -1,14 +1,12 @@
 package com.rbkmoney.faultdetector.handlers;
 
 import com.rbkmoney.faultdetector.data.*;
-import com.rbkmoney.faultdetector.repository.CrudRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -18,8 +16,6 @@ public class CalculateAggregatesHandler implements Handler<String> {
     private final Map<String, ServiceAggregates> serviceAggregatesMap;
 
     private final ServicePreAggregates servicePreAggregates;
-
-    private final CrudRepository<ServiceAggregates> aggregatesRepository;
 
     @Override
     public void handle(String serviceId) {
@@ -56,7 +52,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
 
         ServiceAggregates serviceAggregates = getServiceAggregates(serviceId, failureRate, preAggregatesSet, aggregationTime);
         serviceAggregatesMap.put(serviceId, serviceAggregates);
-        aggregatesRepository.insert(serviceAggregates);
+
         log.info("Processing the service statistics for service '{}' was finished", serviceId);
     }
 
@@ -69,22 +65,12 @@ public class CalculateAggregatesHandler implements Handler<String> {
         serviceAggregates.setAggregateTime(aggregationTime);
         serviceAggregates.setFailureRate(failureRate);
 
-        long totalSuccessOpers = preAggregatesSet.stream()
-                .mapToLong(aggr -> aggr.getSuccessOperationsCount())
-                .sum();
-        serviceAggregates.setTotalSuccessOperationsCount(totalSuccessOpers);
-
-        long totalErrorOpers = preAggregatesSet.stream()
-                .mapToLong(aggr -> aggr.getErrorOperationsCount())
-                .sum();
-        serviceAggregates.setTotalErrorOperationsCount(totalErrorOpers);
-
         PreAggregates lastPreAggregates = preAggregatesSet.stream()
                 .max(Comparator.comparingLong(agg -> agg.getAggregationTime()))
                 .orElse(new PreAggregates());
-        serviceAggregates.setTotalOperationsCount(lastPreAggregates.getRunningOperationsCount() +
-                lastPreAggregates.getOvertimeOperationsCount() + totalSuccessOpers + totalErrorOpers);
+
         serviceAggregates.setOperationsCount(lastPreAggregates.getOperationsCount());
+        serviceAggregates.setRunningOperationsCount(lastPreAggregates.getRunningOperationsCount());
         serviceAggregates.setErrorOperationsCount(lastPreAggregates.getErrorOperationsCount());
         serviceAggregates.setSuccessOperationsCount(lastPreAggregates.getSuccessOperationsCount());
         serviceAggregates.setOvertimeOperationsCount(lastPreAggregates.getOvertimeOperationsCount());
