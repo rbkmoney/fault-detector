@@ -1,10 +1,7 @@
 package com.rbkmoney.faultdetector.services;
 
 import com.rbkmoney.damsel.fault_detector.*;
-import com.rbkmoney.faultdetector.data.ServiceAggregates;
-import com.rbkmoney.faultdetector.data.ServiceOperation;
-import com.rbkmoney.faultdetector.data.ServiceOperations;
-import com.rbkmoney.faultdetector.data.ServiceSettings;
+import com.rbkmoney.faultdetector.data.*;
 import com.rbkmoney.faultdetector.handlers.Handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,14 +26,15 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
 
     private final Handler<ServiceOperation> sendOperationHandler;
 
-    private final Handler<String> calculateAggregatesHandler;
-
     private final ServiceOperations serviceOperations;
+
+    private final FaultDetectorMetrics metrics;
 
     @Override
     public void initService(String serviceId, ServiceConfig serviceConfig) throws TException {
         setServiceSettings(serviceId, serviceConfig);
         serviceOperations.initService(serviceId);
+        metrics.addAggregatesMetrics(serviceId);
         log.info("Service {} have been initialized", serviceId);
     }
 
@@ -95,7 +93,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
 
         try {
             for (String serviceId : services) {
-                calculateAggregatesHandler.handle(serviceId);
+
                 ServiceAggregates aggregates = aggregatesMap.get(serviceId);
                 if (aggregates != null) {
                     ServiceStatistics stat = new ServiceStatistics();
@@ -123,6 +121,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
             if (serviceSettings != null && serviceAggregates != null) {
                 long slidingWindow = serviceSettings.getSlidingWindow();
                 if (System.currentTimeMillis() - serviceAggregates.getAggregateTime() > slidingWindow) {
+                    metrics.removeAggregatesMetrics(serviceId);
                     aggregatesMap.remove(serviceId);
                 }
             }

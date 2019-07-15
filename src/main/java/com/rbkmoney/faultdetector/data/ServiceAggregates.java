@@ -14,22 +14,12 @@ public class ServiceAggregates {
 
     private long operationsCount;
 
-    private long totalOperationsCount;
+    private long runningOperationsCount;
 
     private long successOperationsCount;
 
-    private long totalSuccessOperationsCount;
-
     private long errorOperationsCount;
 
-    private long totalErrorOperationsCount;
-
     private long overtimeOperationsCount;
-
-    private String overtimeOperationsProgressiveLine;
-
-    private String errorOperationsProgressiveLine;
-
-    private String operationsCountProgressiveLine;
 
 }
