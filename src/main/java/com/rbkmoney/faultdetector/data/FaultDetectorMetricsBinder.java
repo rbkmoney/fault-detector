@@ -45,7 +45,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
         List<String> metersList = registry.getMeters().stream()
                 .map(meter -> meter.getId() == null ? "Empty" : meter.getId().getName())
                 .collect(Collectors.toList());
-        log.info("Metric registry list: {}", metersList);
+        log.info("Metric registry after adding gauges for the service {}: {}", serviceId, metersList);
     }
 
     private void registerFailureRateMetrics(MeterRegistry registry) {
