@@ -3,7 +3,6 @@ package com.rbkmoney.faultdetector.integration;
 import com.rbkmoney.damsel.fault_detector.Error;
 import com.rbkmoney.damsel.fault_detector.*;
 import com.rbkmoney.faultdetector.services.FaultDetectorService;
-import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 import org.junit.Test;
@@ -19,9 +18,6 @@ import static org.junit.Assert.assertEquals;
 
 @Slf4j
 public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
-
-    @Autowired
-    private MeterRegistry registry;
 
     @Autowired
     private FaultDetectorService faultDetectorService;

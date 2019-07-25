@@ -85,7 +85,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
     }
 
     private void registerOvertimeOperCountMetrics(MeterRegistry registry) {
-        Gauge.builder(serviceId + OVERTIME_OPER_COUNT_GAUGE_NAME, serviceAggregates, (aggregates) -> aggregates.getErrorOperationsCount())
+        Gauge.builder(serviceId + OVERTIME_OPER_COUNT_GAUGE_NAME, serviceAggregates, ServiceAggregates::getOvertimeOperationsCount)
                 .tags(emptyList())
                 .description("The value of overtime operations count for the service " + serviceId)
                 .baseUnit(BASE_UNIT)

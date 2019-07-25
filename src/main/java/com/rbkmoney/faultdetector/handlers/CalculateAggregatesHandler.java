@@ -66,7 +66,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
         serviceAggregates.setFailureRate(failureRate);
 
         PreAggregates lastPreAggregates = preAggregatesSet.stream()
-                .max(Comparator.comparingLong(agg -> agg.getAggregationTime()))
+                .max(Comparator.comparingLong(PreAggregates::getAggregationTime))
                 .orElse(new PreAggregates());
 
         serviceAggregates.setOperationsCount(lastPreAggregates.getOperationsCount());
