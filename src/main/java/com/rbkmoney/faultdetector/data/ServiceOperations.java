@@ -23,7 +23,7 @@ public class ServiceOperations {
     public void addOperation(String serviceId, String operationId, ServiceOperation serviceOperation) {
         Map<String, ServiceOperation> operationsMap = serviceMap.get(serviceId);
         if (operationsMap == null) {
-            log.error("OperationsMap for service '{}' not found. Service should be re-initialized");
+            log.error("OperationsMap for service '{}' not found. Service should be re-initialized", serviceId);
             return;
         }
 
