@@ -47,8 +47,8 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
     public void registerOperation(String serviceId, Operation operation, ServiceConfig serviceConfig)
             throws ServiceNotFoundException, TException {
         if (!serviceConfigMap.containsKey(serviceId) || !serviceOperations.containsService(serviceId)) {
-            log.error("Service {} is not initialized", serviceId);
-            throw new ServiceNotFoundException();
+            log.warn("Service {} is not initialized. It will be re-initialized", serviceId);
+            initService(serviceId, serviceConfig);
         }
         if (isEmptyOperation(operation)) {
             log.error("Received empty operation for service '{}'", serviceId);
