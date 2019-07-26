@@ -6,6 +6,9 @@ import io.micrometer.core.instrument.binder.MeterBinder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static java.util.Collections.emptyList;
 
 @Slf4j
@@ -18,15 +21,15 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
 
     private static final String GAUGE_PREFEX = ".aggregate.";
 
-    private static final String FAILURE_GAUGE_NAME = GAUGE_PREFEX + "failure.rate.";
+    private static final String FAILURE_GAUGE_NAME = GAUGE_PREFEX + "failure.rate";
 
-    private static final String OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "operations.count.";
+    private static final String OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "operations.count";
 
-    private static final String SUCCESS_OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "success.count.";
+    private static final String SUCCESS_OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "success.count";
 
-    private static final String ERROR_OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "error.count.";
+    private static final String ERROR_OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "error.count";
 
-    private static final String OVERTIME_OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "overtime.count.";
+    private static final String OVERTIME_OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "overtime.count";
 
     private static final String BASE_UNIT = "value";
 
@@ -39,6 +42,10 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
         registerSuccessOperCountMetrics(registry);
         registerErrorOperCountMetrics(registry);
         registerOvertimeOperCountMetrics(registry);
+        List<String> metersList = registry.getMeters().stream()
+                .map(meter -> meter.getId() == null ? "Empty" : meter.getId().getName())
+                .collect(Collectors.toList());
+        log.info("Metric registry after adding gauges for the service {}: {}", serviceId, metersList);
     }
 
     private void registerFailureRateMetrics(MeterRegistry registry) {
@@ -78,7 +85,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
     }
 
     private void registerOvertimeOperCountMetrics(MeterRegistry registry) {
-        Gauge.builder(serviceId + OVERTIME_OPER_COUNT_GAUGE_NAME, serviceAggregates, (aggregates) -> aggregates.getErrorOperationsCount())
+        Gauge.builder(serviceId + OVERTIME_OPER_COUNT_GAUGE_NAME, serviceAggregates, ServiceAggregates::getOvertimeOperationsCount)
                 .tags(emptyList())
                 .description("The value of overtime operations count for the service " + serviceId)
                 .baseUnit(BASE_UNIT)
