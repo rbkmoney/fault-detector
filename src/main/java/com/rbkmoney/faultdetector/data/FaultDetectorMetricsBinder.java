@@ -48,6 +48,10 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
 
     private static final String TIME_UNIT = "ms";
 
+    private static final String OLD_SERVICE_PREFIX = "hellgate_service.adapter_availability.";
+
+    private static final String NEW_SERVICE_PREFIX = "provider_id_";
+
     private static final String GAUGE_LOG_PATTERN = "Gauge {} was added";
 
     @Override
@@ -69,7 +73,10 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
     }
 
     private Meter.Id registerFailureRateMetrics(MeterRegistry registry) {
-        Gauge registerFailureRate = Gauge.builder(FAILURE_GAUGE_NAME + serviceId, serviceAggregates, ServiceAggregates::getFailureRate)
+        Gauge registerFailureRate =
+                Gauge.builder(FAILURE_GAUGE_NAME + replacePrefix(serviceId),
+                        serviceAggregates,
+                        ServiceAggregates::getFailureRate)
                 .tags(emptyList())
                 .description("The value of the availability metric for the service " + serviceId)
                 .baseUnit(BASE_UNIT)
@@ -80,7 +87,10 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
     }
 
     private Meter.Id registerOperCountMetrics(MeterRegistry registry) {
-        Gauge registerOperCount = Gauge.builder(OPER_COUNT_GAUGE_NAME + serviceId, serviceAggregates, ServiceAggregates::getOperationsCount)
+        Gauge registerOperCount =
+                Gauge.builder(OPER_COUNT_GAUGE_NAME + replacePrefix(serviceId),
+                        serviceAggregates,
+                        ServiceAggregates::getOperationsCount)
                 .tags(emptyList())
                 .description("The value of operations count for the service " + serviceId)
                 .baseUnit(BASE_UNIT)
@@ -91,7 +101,10 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
     }
 
     private Meter.Id registerSuccessOperCountMetrics(MeterRegistry registry) {
-        Gauge registerSuccessOperCount = Gauge.builder(SUCCESS_OPER_COUNT_GAUGE_NAME + serviceId, serviceAggregates, ServiceAggregates::getSuccessOperationsCount)
+        Gauge registerSuccessOperCount =
+                Gauge.builder(SUCCESS_OPER_COUNT_GAUGE_NAME + replacePrefix(serviceId),
+                        serviceAggregates,
+                        ServiceAggregates::getSuccessOperationsCount)
                 .tags(emptyList())
                 .description("The value of success operations count for the service " + serviceId)
                 .baseUnit(BASE_UNIT)
@@ -102,7 +115,10 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
     }
 
     private Meter.Id registerErrorOperCountMetrics(MeterRegistry registry) {
-        Gauge registerErrorOperCount = Gauge.builder(ERROR_OPER_COUNT_GAUGE_NAME + serviceId, serviceAggregates, ServiceAggregates::getErrorOperationsCount)
+        Gauge registerErrorOperCount =
+                Gauge.builder(ERROR_OPER_COUNT_GAUGE_NAME + replacePrefix(serviceId),
+                        serviceAggregates,
+                        ServiceAggregates::getErrorOperationsCount)
                 .tags(emptyList())
                 .description("The value of error operations count for the service " + serviceId)
                 .baseUnit(BASE_UNIT)
@@ -113,7 +129,10 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
     }
 
     private Meter.Id registerOvertimeOperCountMetrics(MeterRegistry registry) {
-        Gauge registerOvertimeOperCount = Gauge.builder(OVERTIME_OPER_COUNT_GAUGE_NAME + serviceId, serviceAggregates, ServiceAggregates::getOvertimeOperationsCount)
+        Gauge registerOvertimeOperCount =
+                Gauge.builder(OVERTIME_OPER_COUNT_GAUGE_NAME + replacePrefix(serviceId),
+                        serviceAggregates,
+                        ServiceAggregates::getOvertimeOperationsCount)
                 .tags(emptyList())
                 .description("The value of overtime operations count for the service " + serviceId)
                 .baseUnit(BASE_UNIT)
@@ -125,7 +144,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
 
     private Meter.Id registerConfigSlidingWindow(MeterRegistry registry) {
         Gauge registerConfigSlidingWindowSize =
-                Gauge.builder(CONFIG_SLIDING_WINDOW_GAUGE_NAME + serviceId,
+                Gauge.builder(CONFIG_SLIDING_WINDOW_GAUGE_NAME + replacePrefix(serviceId),
                               serviceSettings,
                               ServiceSettings::getSlidingWindow)
                         .tags(emptyList())
@@ -139,7 +158,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
 
     private Meter.Id registerConfigOperationTimeLimit(MeterRegistry registry) {
         Gauge registerConfigOperationTimeLimitSize =
-                Gauge.builder(CONFIG_OPERATION_TIME_LIMIT_GAUGE_NAME + serviceId,
+                Gauge.builder(CONFIG_OPERATION_TIME_LIMIT_GAUGE_NAME + replacePrefix(serviceId),
                               serviceSettings,
                               ServiceSettings::getOperationTimeLimit)
                         .tags(emptyList())
@@ -153,7 +172,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
 
     private Meter.Id registerConfigPreAggregationSize(MeterRegistry registry) {
         Gauge registerConfigPreAggregationSize =
-                Gauge.builder(CONFIG_PRE_AGGREGATION_SIZE_GAUGE_NAME + serviceId,
+                Gauge.builder(CONFIG_PRE_AGGREGATION_SIZE_GAUGE_NAME + replacePrefix(serviceId),
                               serviceSettings,
                               ServiceSettings::getPreAggregationSize)
                         .tags(emptyList())
@@ -163,6 +182,10 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
 
         log.info(GAUGE_LOG_PATTERN, CONFIG_PRE_AGGREGATION_SIZE_GAUGE_NAME + serviceId);
         return registerConfigPreAggregationSize.getId();
+    }
+
+    private static String replacePrefix(String serviceId) {
+        return serviceId.replace(OLD_SERVICE_PREFIX, NEW_SERVICE_PREFIX);
     }
 
 }
