@@ -26,7 +26,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
 
     private final ServiceSettings serviceSettings;
 
-    private static final String GAUGE_PREFEX = "1fd.aggregates.";
+    private static final String GAUGE_PREFEX = "fd.aggregates.";
 
     private static final String FAILURE_GAUGE_NAME = GAUGE_PREFEX + "failure.rate_";
 
