@@ -2,6 +2,7 @@ package com.rbkmoney.faultdetector.data;
 
 import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.MeterBinder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,10 @@ public class FaultDetectorMetrics {
 
     private final MeterRegistry registry;
 
+    private final Map<String, MeterBinder> serviceMeterBinders;
+
+    private final Map<String, ServiceSettings> serviceConfigMap;
+
     private final Map<String, List<Meter.Id>> serviceMetersMap = new ConcurrentHashMap<>();;
 
     private List<String> registerServiceList = new CopyOnWriteArrayList<>();
@@ -32,7 +37,11 @@ public class FaultDetectorMetrics {
 
         registerServiceList.add(serviceId);
         ServiceAggregates serviceAggregates = aggregatesMap.get(serviceId);
-        new FaultDetectorMetricsBinder(serviceAggregates, serviceId, serviceMetersMap).bindTo(registry);
+        ServiceSettings serviceSettings = serviceConfigMap.get(serviceId);
+        MeterBinder faultDetectorMetricsBinder =
+                new FaultDetectorMetricsBinder(serviceAggregates, serviceId, serviceMetersMap, serviceSettings);
+        faultDetectorMetricsBinder.bindTo(registry);
+        serviceMeterBinders.put(serviceId, faultDetectorMetricsBinder);
 
         log.info("Add gauge metrics for the service {}", serviceId);
     }
@@ -45,6 +54,10 @@ public class FaultDetectorMetrics {
         } else {
             log.info("Remove gauge for service {} could not be performed", serviceId);
         }
+    }
+
+    public boolean isExistServiceMetrics(String serviceId) {
+        return serviceMetersMap.containsKey(serviceId);
     }
 
 }
