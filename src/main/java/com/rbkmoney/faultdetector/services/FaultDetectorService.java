@@ -34,7 +34,6 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
     public void initService(String serviceId, ServiceConfig serviceConfig) throws TException {
         setServiceSettings(serviceId, serviceConfig);
         serviceOperations.initService(serviceId);
-        metrics.addAggregatesMetrics(serviceId);
         log.info("Service {} have been initialized", serviceId);
     }
 
@@ -103,6 +102,10 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
                     stat.setErrorOperationsCount(aggregates.getErrorOperationsCount());
                     stat.setSuccessOperationsCount(aggregates.getSuccessOperationsCount());
                     serviceStatisticsList.add(stat);
+
+                    if (!metrics.isExistServiceMetrics(serviceId)) {
+                        metrics.addAggregatesMetrics(serviceId);
+                    }
                 }
             }
             clearUnusualAggregates();
