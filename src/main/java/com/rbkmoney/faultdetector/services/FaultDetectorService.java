@@ -103,9 +103,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
                     stat.setSuccessOperationsCount(aggregates.getSuccessOperationsCount());
                     serviceStatisticsList.add(stat);
 
-                    if (!metrics.isExistServiceMetrics(serviceId)) {
-                        metrics.addAggregatesMetrics(serviceId);
-                    }
+                    metrics.addAggregatesMetrics(serviceId);
                 }
             }
             clearUnusualAggregates();
