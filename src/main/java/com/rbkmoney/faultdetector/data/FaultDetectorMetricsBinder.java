@@ -34,6 +34,8 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
 
     private static final String SUCCESS_OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "success.count_";
 
+    private static final String RUNNING_OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "running.count_";
+
     private static final String ERROR_OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "error.count_";
 
     private static final String OVERTIME_OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "overtime.count_";
@@ -60,6 +62,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
         meterIds.add(registerFailureRateMetrics(registry));
         meterIds.add(registerOperCountMetrics(registry));
         meterIds.add(registerSuccessOperCountMetrics(registry));
+        meterIds.add(registerRunningOperCountMetrics(registry));
         meterIds.add(registerErrorOperCountMetrics(registry));
         meterIds.add(registerOvertimeOperCountMetrics(registry));
         meterIds.add(registerConfigSlidingWindow(registry));
@@ -110,6 +113,20 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
 
         log.info(GAUGE_LOG_PATTERN, SUCCESS_OPER_COUNT_GAUGE_NAME + serviceId);
         return registerSuccessOperCount.getId();
+    }
+
+    private Meter.Id registerRunningOperCountMetrics(MeterRegistry registry) {
+        Gauge registerRunningOperCount =
+                Gauge.builder(RUNNING_OPER_COUNT_GAUGE_NAME + replacePrefix(serviceId),
+                        aggregatesMap,
+                        aggregatesMap -> aggregatesMap.get(serviceId).getRunningOperationsCount())
+                .tags(emptyList())
+                .description("The value of running operations count for the service " + serviceId)
+                .baseUnit(BASE_UNIT)
+                .register(registry);
+
+        log.info(GAUGE_LOG_PATTERN, RUNNING_OPER_COUNT_GAUGE_NAME + serviceId);
+        return registerRunningOperCount.getId();
     }
 
     private Meter.Id registerErrorOperCountMetrics(MeterRegistry registry) {
