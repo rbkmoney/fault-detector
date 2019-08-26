@@ -1,8 +1,10 @@
 package com.rbkmoney.faultdetector.config;
 
 import com.rbkmoney.faultdetector.data.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,6 +19,9 @@ public class AppConfig {
     private final ServicePreAggregates servicePreAggregates = new ServicePreAggregates();
 
     private final ServiceOperations serviceOperations = new ServiceOperations();
+
+    @Value("${operations.scheduler-pool-size}")
+    private int schedulerPoolSize;
 
     @Bean
     public Map<String, ServiceAggregates> aggregatesMap() {
@@ -36,6 +41,13 @@ public class AppConfig {
     @Bean
     public ServiceOperations serviceOperations() {
         return serviceOperations;
+    }
+
+    @Bean
+    public ThreadPoolTaskScheduler taskScheduler(){
+        ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+        taskScheduler.setPoolSize(schedulerPoolSize);
+        return taskScheduler;
     }
 
 }

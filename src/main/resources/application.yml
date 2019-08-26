@@ -15,6 +15,7 @@ operations:
   aggregation-delay: 5000
   pre-aggregation-period: 5000
   revision: 60000
+  scheduler-pool-size: 5
 
 kafka:
   bootstrap:
