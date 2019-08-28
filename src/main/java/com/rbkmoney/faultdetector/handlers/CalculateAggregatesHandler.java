@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
+import static com.rbkmoney.faultdetector.utils.TransformDataUtils.getPreAggregatesDequeBySettings;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -60,35 +62,6 @@ public class CalculateAggregatesHandler implements Handler<String> {
         serviceAggregatesMap.put(serviceId, serviceAggregates);
 
         log.info("Processing the service statistics for service '{}' was finished", serviceId);
-    }
-
-    private Deque<PreAggregates> getPreAggregatesDequeBySettings(Deque<PreAggregates> preAggregatesDeque,
-                                                                 ServiceSettings settings) {
-        int preAggregationSize = settings.getPreAggregationSize();
-        if (preAggregationSize == 1) {
-            return preAggregatesDeque;
-        }
-
-        Deque<PreAggregates> newPreAggregatesDeque = new ConcurrentLinkedDeque<>();
-
-        Iterator<PreAggregates> preAggregatesIterator = preAggregatesDeque.iterator();
-        while (preAggregatesIterator.hasNext()) {
-            PreAggregates newPreAggregates = preAggregatesIterator.next().copy();
-            for (int i = 0; i < preAggregationSize - 1; i++) {
-                if (preAggregatesIterator.hasNext()) {
-                    PreAggregates nextPreAggregates = preAggregatesIterator.next();
-                    newPreAggregates.setOperationsCount(
-                            newPreAggregates.getOperationsCount() + nextPreAggregates.getOperationsCount());
-                    newPreAggregates.setErrorOperationsCount(
-                            newPreAggregates.getErrorOperationsCount() + nextPreAggregates.getErrorOperationsCount());
-                    newPreAggregates.setSuccessOperationsCount(
-                            newPreAggregates.getSuccessOperationsCount() + nextPreAggregates.getSuccessOperationsCount());
-                    newPreAggregates.getOvertimeOperationsSet().addAll(newPreAggregates.getOvertimeOperationsSet());
-                }
-            }
-            newPreAggregatesDeque.addLast(newPreAggregates);
-        }
-        return newPreAggregatesDeque;
     }
 
     private ServiceAggregates getServiceAggregates(String serviceId,
