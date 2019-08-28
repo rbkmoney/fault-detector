@@ -8,14 +8,9 @@ info:
   version: @project.version@
   stage: dev
 
-preparing:
-  delay: 5000
-
 operations:
-  aggregation-delay: 5000
-  pre-aggregation-period: 5000
-  revision: 60000
-  scheduler-pool-size: 5
+  pre-aggregation-period: 1000
+  scheduler-pool-size: 2
 
 kafka:
   bootstrap:

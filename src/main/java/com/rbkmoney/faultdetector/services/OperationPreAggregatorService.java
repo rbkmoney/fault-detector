@@ -16,9 +16,7 @@ public class OperationPreAggregatorService {
 
     private final ServiceOperations serviceOperations;
 
-    // TODO: подумать, чтобы время агрегации задавалось пользователем
-    // TODO: либо производить агрегацию во время пулинга эаентов из кафки, так как полуаем пакет операций
-    @Scheduled(fixedDelayString = "${operations.aggregation-delay}")
+    @Scheduled(fixedRateString = "${operations.pre-aggregation-period}")
     public void process() {
         for (String serviceId : serviceOperations.getServices()) {
             try {

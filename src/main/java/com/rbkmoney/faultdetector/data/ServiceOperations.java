@@ -71,4 +71,14 @@ public class ServiceOperations {
         return serviceMap.keySet();
     }
 
+    public void cleanUnusualOperations(String serviceId, ServiceSettings settings) {
+        long currentTimeMillis = System.currentTimeMillis();
+        Map<String, ServiceOperation> serviceEventMap = getServiceOperationsMap(serviceId);
+        for (ServiceOperation event : serviceEventMap.values()) {
+            if (currentTimeMillis - event.getStartTime() > settings.getSlidingWindow()) {
+                serviceEventMap.remove(event.getOperationId());
+            }
+        }
+    }
+
 }

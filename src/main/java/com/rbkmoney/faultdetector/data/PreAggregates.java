@@ -3,7 +3,9 @@ package com.rbkmoney.faultdetector.data;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Data
 public class PreAggregates implements Comparable<PreAggregates> {
@@ -16,7 +18,7 @@ public class PreAggregates implements Comparable<PreAggregates> {
 
     private int runningOperationsCount;
 
-    private int overtimeOperationsCount;
+    private Set<String> overtimeOperationsSet = new HashSet<>();
 
     private int errorOperationsCount;
 
@@ -32,8 +34,12 @@ public class PreAggregates implements Comparable<PreAggregates> {
         runningOperationsCount++;
     }
 
-    public void addOvertimeOperation() {
-        overtimeOperationsCount++;
+    public void addOvertimeOperation(String operationId) {
+        overtimeOperationsSet.add(operationId);
+    }
+
+    public int getOvertimeOperationsCount() {
+        return overtimeOperationsSet.size();
     }
 
     public void addErrorOperation() {
@@ -66,5 +72,20 @@ public class PreAggregates implements Comparable<PreAggregates> {
         } else {
             return -1;
         }
+    }
+
+    public PreAggregates copy() {
+        PreAggregates preAggregates = new PreAggregates();
+        preAggregates.setAggregationTime(aggregationTime);
+        preAggregates.setServiceId(serviceId);
+        preAggregates.setOperationsCount(operationsCount);
+        preAggregates.setRunningOperationsCount(runningOperationsCount);
+        preAggregates.setOvertimeOperationsSet(overtimeOperationsSet);
+        preAggregates.setErrorOperationsCount(errorOperationsCount);
+        preAggregates.setSuccessOperationsCount(successOperationsCount);
+        preAggregates.setOperationTimeLimit(operationTimeLimit);
+        preAggregates.setSlidingWindow(slidingWindow);
+        preAggregates.setPreAggregationSize(preAggregationSize);
+        return preAggregates;
     }
 }
