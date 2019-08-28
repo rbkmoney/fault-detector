@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
+import java.util.*;
+
+import static ch.qos.logback.core.CoreConstants.EMPTY_STRING;
 
 @Slf4j
 @Component
@@ -22,13 +24,10 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
 
     private final Handler<String> calculateAggregatesHandler;
 
-    private static final String EMPTY_STRING = "";
-
     @Override
     public void handle(String serviceId) {
         Map<String, ServiceOperation> serviceOperationMap = serviceOperations.getServiceOperationsMap(serviceId);
         if (serviceOperationMap == null || serviceOperationMap.isEmpty()) {
-            //TODO: вопрос на мульт - заполнять пустыми значениями или не делать ничего?
             log.info("The list of operations for the service {} is empty", serviceId);
             return;
         }
@@ -49,15 +48,17 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
         ServiceSettings settings = serviceConfigMap.get(serviceId);
         log.info("Pre-aggregates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
         servicePreAggregates.addPreAggregates(serviceId, preAggregates);
+
+        serviceOperations.cleanUnusualOperations(serviceId, settings);
         servicePreAggregates.cleanPreAggregares(serviceId, settings);
 
         calculateAggregatesHandler.handle(serviceId);
     }
 
     private String prepareOperation(ServiceOperation serviceOperation,
-                                  PreAggregates preAggregates,
-                                  ServiceSettings serviceSettings,
-                                  long currentTimeMillis) {
+                                    PreAggregates preAggregates,
+                                    ServiceSettings serviceSettings,
+                                    long currentTimeMillis) {
         if (serviceOperation.getEndTime() > 0) {
             long operExecTime = serviceOperation.getEndTime() - serviceOperation.getStartTime();
             if (serviceOperation.isError()) {
@@ -66,7 +67,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
             } else if (operExecTime > serviceSettings.getOperationTimeLimit()) {
                 // Добавляем завершившуюся зависшую операцию в агрегат.
                 // Так как операция уже завершилась она удаляется из списка
-                preAggregates.addOvertimeOperation();
+                preAggregates.addOvertimeOperation(serviceOperation.getOperationId());
             } else {
                 // Добавляем в список выполняющихся
                 preAggregates.addSuccessOperation();
@@ -77,7 +78,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
             if (operExecTime > serviceSettings.getOperationTimeLimit()) {
                 // Зависшая операция должна учитываться как сбойная, но не удаляться из
                 // общего списка, чтобы было понимание сколько операций "висит"
-                preAggregates.addOvertimeOperation();
+                preAggregates.addOvertimeOperation(serviceOperation.getOperationId());
             } else {
                 // Операция еще выполняется и не превысила допустимое на выполнение время
                 preAggregates.addRunningOperation();

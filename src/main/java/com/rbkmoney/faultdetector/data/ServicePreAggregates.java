@@ -2,31 +2,31 @@ package com.rbkmoney.faultdetector.data;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Deque;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Slf4j
 public class ServicePreAggregates {
 
-    private final Map<String, Set<PreAggregates>> servicePreAggregatesMap = new ConcurrentHashMap<>();
+    private final Map<String, Deque<PreAggregates>> servicePreAggregatesMap = new ConcurrentHashMap<>();
 
     public void addPreAggregates(String serviceId, PreAggregates preAggregates) {
-        Set<PreAggregates> preAggregatesSet;
+        Deque<PreAggregates> preAggregatesSet;
         if (servicePreAggregatesMap.containsKey(serviceId)) {
             preAggregatesSet = servicePreAggregatesMap.get(serviceId);
         } else {
-            preAggregatesSet = new ConcurrentSkipListSet();
+            preAggregatesSet = new ConcurrentLinkedDeque<>();
         }
-        preAggregatesSet.add(preAggregates);
+        preAggregatesSet.addFirst(preAggregates);
         servicePreAggregatesMap.put(serviceId, preAggregatesSet);
         log.info("Pre-aggregates '{}' for service '{}' were added", preAggregates, serviceId);
     }
 
     public void cleanPreAggregares(String serviceId, ServiceSettings settings) {
         if (servicePreAggregatesMap.containsKey(serviceId)) {
-            Set<PreAggregates> preAggregates = servicePreAggregatesMap.get(serviceId);
+            Deque<PreAggregates> preAggregates = servicePreAggregatesMap.get(serviceId);
             if (preAggregates != null) {
                 long currentTime = System.currentTimeMillis();
                 long slidingWindow = settings.getSlidingWindow();
@@ -43,12 +43,8 @@ public class ServicePreAggregates {
         }
     }
 
-    public Set<PreAggregates> getPreAggregatesSet(String serviceId) {
+    public Deque<PreAggregates> getPreAggregatesSet(String serviceId) {
         return servicePreAggregatesMap.get(serviceId);
-    }
-
-    public Set<String> getServices() {
-        return servicePreAggregatesMap.keySet();
     }
 
 }
