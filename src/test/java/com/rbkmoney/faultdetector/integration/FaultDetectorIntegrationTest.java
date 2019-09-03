@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static com.rbkmoney.faultdetector.data.FaultDetectorData.getStartOperation;
 import static org.junit.Assert.assertEquals;
@@ -65,8 +66,8 @@ public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
                 80, serviceStatistics.getSuccessOperationsCount());
         assertEquals("The number of error operations is not equal to expected",
                 0, serviceStatistics.getErrorOperationsCount());
-        String expectedFailureRate = "0,07";
-        String receivedFailureRate = String.format("%(.2f", serviceStatistics.getFailureRate());
+        String expectedFailureRate = "0.07";
+        String receivedFailureRate = String.format(Locale.ENGLISH, "%(.2f", serviceStatistics.getFailureRate());
         assertEquals("Failure rate is not equal to expected", expectedFailureRate, receivedFailureRate);
 
     }
