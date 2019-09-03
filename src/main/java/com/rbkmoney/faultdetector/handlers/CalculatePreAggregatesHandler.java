@@ -23,6 +23,8 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
 
     private final Handler<String> calculateAggregatesHandler;
 
+    private static final long MILLS_IN_SECOND = 1000L;
+
     @Override
     public void handle(String serviceId) {
         Map<String, ServiceOperation> serviceOperationMap = serviceOperations.getServiceOperationsMap(serviceId);
@@ -46,7 +48,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
         }
 
         Deque<PreAggregates> preAggregatesDeque = servicePreAggregates.getPreAggregatesDeque(serviceId);
-        long preAggSize = settings.getPreAggregationSize() * 1000;
+        long preAggSize = settings.getPreAggregationSize() * MILLS_IN_SECOND;
 
         if (preAggregatesDeque != null &&
                 currentTimeMillis - preAggregatesDeque.getFirst().getAggregationTime() < preAggSize) {
