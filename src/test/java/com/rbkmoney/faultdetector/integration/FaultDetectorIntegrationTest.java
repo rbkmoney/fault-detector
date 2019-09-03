@@ -66,9 +66,7 @@ public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
         assertEquals("The number of error operations is not equal to expected",
                 0, serviceStatistics.getErrorOperationsCount());
         String expectedFailureRate = "0,07";
-        String pattern = "##0.00";
-        DecimalFormat decimalFormat = new DecimalFormat(pattern);
-        String receivedFailureRate = decimalFormat.format(serviceStatistics.getFailureRate());
+        String receivedFailureRate = String.format("%(.2f", serviceStatistics.getFailureRate());
         assertEquals("Failure rate is not equal to expected", expectedFailureRate, receivedFailureRate);
 
     }
