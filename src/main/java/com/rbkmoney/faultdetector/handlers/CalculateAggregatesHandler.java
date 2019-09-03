@@ -7,9 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedDeque;
-
-import static com.rbkmoney.faultdetector.utils.TransformDataUtils.getPreAggregatesDequeBySettings;
 
 @Slf4j
 @Component
@@ -20,35 +17,30 @@ public class CalculateAggregatesHandler implements Handler<String> {
 
     private final ServicePreAggregates servicePreAggregates;
 
-    private final Map<String, ServiceSettings> serviceConfigMap;
-
     @Override
     public void handle(String serviceId) {
         log.info("Start processing the service statistics for service '{}'", serviceId);
-        Deque<PreAggregates> preAggregatesDeque = servicePreAggregates.getPreAggregatesSet(serviceId);
+        Deque<PreAggregates> preAggregatesDeque = servicePreAggregates.getPreAggregatesDeque(serviceId);
 
         if (preAggregatesDeque == null || preAggregatesDeque.isEmpty()) {
             return;
         }
 
-        Deque<PreAggregates> dequeBySettings =
-                getPreAggregatesDequeBySettings(preAggregatesDeque, serviceConfigMap.get(serviceId));
-
-        int weight = dequeBySettings.size();
+        int weight = preAggregatesDeque.size();
         double failureRateSum = 0;
         long weightSum = 0;
         long aggregationTime = System.currentTimeMillis();
         log.info("Count of pre-aggregates for service '{}': {}. Time label: {}", serviceId,
-                dequeBySettings.size(), aggregationTime);
+                preAggregatesDeque.size(), aggregationTime);
 
-        for (PreAggregates preAggregates : dequeBySettings) {
+        for (PreAggregates preAggregates : preAggregatesDeque) {
             int overtimeOperationsCount = preAggregates.getOvertimeOperationsCount();
             int errorOperationsCount = preAggregates.getErrorOperationsCount();
             int failureOperationsCount = errorOperationsCount + overtimeOperationsCount;
             double failureRate = ((double) failureOperationsCount / preAggregates.getOperationsCount()) * weight;
             failureRateSum += failureRate;
             weightSum += weight;
-            log.debug("Step pre-aggregation {} for the service '{}'. Params: overtimeOperationsCount - {}, " +
+            log.info("Step pre-aggregation {} for the service '{}'. Params: overtimeOperationsCount - {}, " +
                             "errorOperationsCount - {}, operationsCount - {}, failureRate - {}, failureRateSum - {}, " +
                             "weightSum - {}. Time label: {} ", weight, serviceId, overtimeOperationsCount,
                     errorOperationsCount, preAggregates.getOperationsCount(), failureRate, failureRateSum, weightSum,
@@ -58,7 +50,8 @@ public class CalculateAggregatesHandler implements Handler<String> {
 
         double failureRate = weightSum == 0 ? 0 : failureRateSum / weightSum;
 
-        ServiceAggregates serviceAggregates = getServiceAggregates(serviceId, failureRate, dequeBySettings, aggregationTime);
+        ServiceAggregates serviceAggregates =
+                getServiceAggregates(serviceId, failureRate, preAggregatesDeque, aggregationTime);
         serviceAggregatesMap.put(serviceId, serviceAggregates);
 
         log.info("Processing the service statistics for service '{}' was finished", serviceId);

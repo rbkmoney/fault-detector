@@ -43,7 +43,7 @@ public class ServicePreAggregates {
         }
     }
 
-    public Deque<PreAggregates> getPreAggregatesSet(String serviceId) {
+    public Deque<PreAggregates> getPreAggregatesDeque(String serviceId) {
         return servicePreAggregatesMap.get(serviceId);
     }
 

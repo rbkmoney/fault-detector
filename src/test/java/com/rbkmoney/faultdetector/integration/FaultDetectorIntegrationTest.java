@@ -2,16 +2,19 @@ package com.rbkmoney.faultdetector.integration;
 
 import com.rbkmoney.damsel.fault_detector.Error;
 import com.rbkmoney.damsel.fault_detector.*;
+import com.rbkmoney.faultdetector.handlers.Handler;
 import com.rbkmoney.faultdetector.services.FaultDetectorService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static com.rbkmoney.faultdetector.data.FaultDetectorData.getStartOperation;
 import static org.junit.Assert.assertEquals;
@@ -22,6 +25,9 @@ public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private FaultDetectorService faultDetectorService;
 
+    @Autowired
+    private Handler<String> calculatePreAggregatesHandler;
+
     @Test
     public void serviceTest() throws TException, ParseException, InterruptedException {
         String serviceId = "service_one";
@@ -31,11 +37,19 @@ public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
         int initOperationsDelta = 3000;
         ServiceConfig serviceConfig = getServiceConfig();
         faultDetectorService.initService(serviceId, serviceConfig);
-        List<Operation> startOperations = sendStartOperations(serviceId, serviceConfig,
-                initOperationsCount, initOperationsDelta);
-        sendFinishOperations(serviceId, serviceConfig, startOperations, successOperationsCount);
+
+        List<Operation> startOperations =
+                sendStartOperations(serviceId, serviceConfig, initOperationsCount, initOperationsDelta);
+        Thread.sleep(1000);
+        calculatePreAggregatesHandler.handle(serviceId);
+
         sendErrorOperations(serviceId, serviceConfig, startOperations, errorOperationsCount);
-        Thread.sleep(30000);
+        Thread.sleep(1000);
+        calculatePreAggregatesHandler.handle(serviceId);
+
+        sendSuccessFinishOperations(serviceId, serviceConfig, startOperations, successOperationsCount);
+        Thread.sleep(1000);
+        calculatePreAggregatesHandler.handle(serviceId);
 
         List<String> services = new ArrayList<>();
         services.add(serviceId);
@@ -47,13 +61,13 @@ public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
         ServiceStatistics serviceStatistics = statistics.get(0);
 
         assertEquals("The number of operations is not equal to expected",
-                initOperationsCount, serviceStatistics.getOperationsCount());
+                80, serviceStatistics.getOperationsCount());
         assertEquals("The number of success operations is not equal to expected",
-                successOperationsCount, serviceStatistics.getSuccessOperationsCount());
+                80, serviceStatistics.getSuccessOperationsCount());
         assertEquals("The number of error operations is not equal to expected",
-                errorOperationsCount, serviceStatistics.getErrorOperationsCount());
-        Double expectedFailureRate = 0.2;
-        Double receivedFailureRate = serviceStatistics.getFailureRate();
+                0, serviceStatistics.getErrorOperationsCount());
+        String expectedFailureRate = "0.07";
+        String receivedFailureRate = String.format(Locale.ENGLISH, "%(.2f", serviceStatistics.getFailureRate());
         assertEquals("Failure rate is not equal to expected", expectedFailureRate, receivedFailureRate);
 
     }
@@ -74,7 +88,7 @@ public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
         return operations;
     }
 
-    private void sendFinishOperations(String serviceId,
+    private void sendSuccessFinishOperations(String serviceId,
                                       ServiceConfig serviceConfig,
                                       List<Operation> initOperations,
                                       int countFinishOperations) throws TException, ParseException {
@@ -135,9 +149,9 @@ public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
 
     private static ServiceConfig getServiceConfig() {
         ServiceConfig serviceConfig = new ServiceConfig();
-        serviceConfig.setOperationTimeLimit(60000);
-        serviceConfig.setSlidingWindow(60000);
-        serviceConfig.setPreAggregationSize(1);
+        serviceConfig.setOperationTimeLimit(4000);
+        serviceConfig.setSlidingWindow(20000);
+        serviceConfig.setPreAggregationSize(2);
         return serviceConfig;
     }
 
