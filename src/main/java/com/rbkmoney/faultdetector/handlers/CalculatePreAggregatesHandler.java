@@ -27,6 +27,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
     public void handle(String serviceId) {
         Map<String, ServiceOperation> serviceOperationMap = serviceOperations.getServiceOperationsMap(serviceId);
         if (serviceOperationMap == null || serviceOperationMap.isEmpty()) {
+            //TODO: возможно имеет смысл пустые "тики" добивать
             log.info("The list of operations for the service {} is empty", serviceId);
             return;
         }
