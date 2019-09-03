@@ -4,6 +4,7 @@ import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -16,9 +17,13 @@ public class PreAggregates implements Comparable<PreAggregates> {
 
     private int operationsCount;
 
+    private final Set<String> operationsSet = new HashSet<>();
+
     private int runningOperationsCount;
 
-    private Set<String> overtimeOperationsSet = new HashSet<>();
+    private int overtimeOperationsCount;
+
+    private final Set<String> overtimeOperationsSet = new HashSet<>();
 
     private int errorOperationsCount;
 
@@ -30,16 +35,40 @@ public class PreAggregates implements Comparable<PreAggregates> {
 
     private int preAggregationSize;
 
+    private boolean isMerged;
+
+    public void addOperation(String operationId) {
+        operationsSet.add(operationId);
+        operationsCount = operationsSet.size();
+    }
+
+    public void addOperations(List<String> operationIds) {
+        operationsSet.addAll(operationIds);
+        operationsCount = operationsSet.size();
+    }
+
+    public void addOperations(Set<String> operationIds) {
+        operationsSet.addAll(operationIds);
+        operationsCount = operationsSet.size();
+    }
+
     public void addRunningOperation() {
         runningOperationsCount++;
     }
 
     public void addOvertimeOperation(String operationId) {
         overtimeOperationsSet.add(operationId);
+        overtimeOperationsCount = overtimeOperationsSet.size();
     }
 
-    public int getOvertimeOperationsCount() {
-        return overtimeOperationsSet.size();
+    public void addOvertimeOperations(List<String> operationIds) {
+        overtimeOperationsSet.addAll(operationIds);
+        overtimeOperationsCount = overtimeOperationsSet.size();
+    }
+
+    public void addOvertimeOperations(Set<String> operationIds) {
+        overtimeOperationsSet.addAll(operationIds);
+        overtimeOperationsCount = overtimeOperationsSet.size();
     }
 
     public void addErrorOperation() {
@@ -74,13 +103,18 @@ public class PreAggregates implements Comparable<PreAggregates> {
         }
     }
 
+    public void clearTempData() {
+        operationsSet.clear();
+        overtimeOperationsSet.clear();
+    }
+
     public PreAggregates copy() {
         PreAggregates preAggregates = new PreAggregates();
         preAggregates.setAggregationTime(aggregationTime);
         preAggregates.setServiceId(serviceId);
-        preAggregates.setOperationsCount(operationsCount);
+        preAggregates.getOperationsSet().addAll(operationsSet);
         preAggregates.setRunningOperationsCount(runningOperationsCount);
-        preAggregates.setOvertimeOperationsSet(overtimeOperationsSet);
+        preAggregates.getOvertimeOperationsSet().addAll(overtimeOperationsSet);
         preAggregates.setErrorOperationsCount(errorOperationsCount);
         preAggregates.setSuccessOperationsCount(successOperationsCount);
         preAggregates.setOperationTimeLimit(operationTimeLimit);

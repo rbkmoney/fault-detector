@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 import static ch.qos.logback.core.CoreConstants.EMPTY_STRING;
+import static com.rbkmoney.faultdetector.utils.TransformDataUtils.mergePreAggregates;
 
 @Slf4j
 @Component
@@ -20,8 +21,6 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
 
     private final ServiceOperations serviceOperations;
 
-    private final Map<String, ServiceSettings> serviceConfigMap;
-
     private final Handler<String> calculateAggregatesHandler;
 
     @Override
@@ -33,21 +32,35 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
         }
 
         Long currentTimeMillis = System.currentTimeMillis();
+        ServiceSettings settings = serviceSettingsMap.get(serviceId);
 
         PreAggregates preAggregates = new PreAggregates();
         preAggregates.setAggregationTime(currentTimeMillis);
         preAggregates.setServiceId(serviceId);
-        preAggregates.setOperationsCount(serviceOperationMap.size());
+        preAggregates.addOperations(serviceOperationMap.keySet());
 
-        ServiceSettings serviceSettings = serviceSettingsMap.get(serviceId);
         for (ServiceOperation serviceOperation : serviceOperationMap.values()) {
-            String operationId = prepareOperation(serviceOperation, preAggregates, serviceSettings, currentTimeMillis);
+            String operationId = prepareOperation(serviceOperation, preAggregates, settings, currentTimeMillis);
             serviceOperationMap.remove(operationId);
         }
 
-        ServiceSettings settings = serviceConfigMap.get(serviceId);
-        log.info("Pre-aggregates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
-        servicePreAggregates.addPreAggregates(serviceId, preAggregates);
+        Deque<PreAggregates> preAggregatesDeque = servicePreAggregates.getPreAggregatesDeque(serviceId);
+        long preAggSize = settings.getPreAggregationSize() * 1000;
+
+        if (preAggregatesDeque != null &&
+                currentTimeMillis - preAggregatesDeque.getFirst().getAggregationTime() < preAggSize) {
+            PreAggregates lastPreAggregates = preAggregatesDeque.getFirst();
+            log.info("Merge pre-aggregates for service '{}' : old - {} and additional - {}", serviceId,
+                    lastPreAggregates, preAggregates);
+            mergePreAggregates(lastPreAggregates, preAggregates);
+            log.info("Result pre-aggregates for service '{}' after merge: {}", serviceId, lastPreAggregates);
+        } else {
+            if (preAggregatesDeque != null) {
+                preAggregatesDeque.getFirst().clearTempData();
+            }
+            log.info("New pre-aggregates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
+            servicePreAggregates.addPreAggregates(serviceId, preAggregates);
+        }
 
         serviceOperations.cleanUnusualOperations(serviceId, settings);
         servicePreAggregates.cleanPreAggregares(serviceId, settings);
