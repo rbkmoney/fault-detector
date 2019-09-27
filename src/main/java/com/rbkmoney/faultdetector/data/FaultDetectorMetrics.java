@@ -22,16 +22,27 @@ public class FaultDetectorMetrics {
 
     private final MeterRegistry registry;
 
-    private final Map<String, List<Meter.Id>> serviceMetersMap = new ConcurrentHashMap<>();;
+    private final Map<String, List<Meter.Id>> serviceMetersMap = new ConcurrentHashMap<>();
+
+    private static final int MAX_SERVICE_METER_MAP_SIZE = 100;
 
     public void addAggregatesMetrics(String serviceId) {
         if (serviceMetersMap.containsKey(serviceId)) {
             log.info("A gauge metrics for the service {} already exists", serviceId);
             return;
         } else {
-            MeterBinder faultDetectorMetricsBinder =
-                    new FaultDetectorMetricsBinder(aggregatesMap, serviceConfigMap, serviceMetersMap, serviceId);
-            faultDetectorMetricsBinder.bindTo(registry);
+            if (serviceMetersMap.size() > MAX_SERVICE_METER_MAP_SIZE) {
+                log.warn("Service meter map is bigger then expected. New metrics for service {} won't added");
+                return;
+            }
+            try {
+                MeterBinder faultDetectorMetricsBinder =
+                        new FaultDetectorMetricsBinder(aggregatesMap, serviceConfigMap, serviceMetersMap, serviceId);
+                faultDetectorMetricsBinder.bindTo(registry);
+            } catch (Exception ex) {
+                log.error("Error received while adding metrics for service {}", serviceId, ex);
+            }
+
             log.info("Add gauge metrics for the service {}", serviceId);
         }
     }
