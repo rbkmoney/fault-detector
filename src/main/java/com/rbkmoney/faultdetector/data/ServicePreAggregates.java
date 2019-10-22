@@ -42,7 +42,7 @@ public class ServicePreAggregates {
             log.error("Pre-aggregates for clean operation for service {} not found", serviceId);
         }
 
-        if (servicePreAggregatesMap.get(serviceId).isEmpty()) {
+        if (servicePreAggregatesMap.get(serviceId) != null && servicePreAggregatesMap.get(serviceId).isEmpty()) {
             servicePreAggregatesMap.remove(serviceId);
         }
     }

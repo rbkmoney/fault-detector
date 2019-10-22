@@ -29,7 +29,6 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
     public void handle(String serviceId) {
         ServiceSettings settings = serviceSettingsMap.get(serviceId);
         serviceOperations.cleanUnusualOperations(serviceId, settings);
-        servicePreAggregates.cleanPreAggregares(serviceId, settings);
 
         Map<String, ServiceOperation> serviceOperationMap = serviceOperations.getServiceOperationsMap(serviceId);
         if (serviceOperationMap == null || serviceOperationMap.isEmpty()) {
@@ -68,6 +67,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
             servicePreAggregates.addPreAggregates(serviceId, preAggregates);
         }
 
+        servicePreAggregates.cleanPreAggregares(serviceId, settings);
         calculateAggregatesHandler.handle(serviceId);
     }
 
