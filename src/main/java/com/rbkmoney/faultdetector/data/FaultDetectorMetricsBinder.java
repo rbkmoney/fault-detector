@@ -79,8 +79,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
         Gauge registerFailureRate =
                 Gauge.builder(FAILURE_GAUGE_NAME + replacePrefix(serviceId),
                         aggregatesMap,
-                        aggregatesMap -> aggregatesMap.get(serviceId) == null ?
-                                null : aggregatesMap.get(serviceId).getFailureRate())
+                        aggregatesMap -> aggregatesMap.get(serviceId).getFailureRate())
                 .description("The value of the availability metric for the service " + serviceId)
                 .baseUnit(BASE_UNIT)
                 .register(registry);
@@ -93,8 +92,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
         Gauge registerOperCount =
                 Gauge.builder(OPER_COUNT_GAUGE_NAME + replacePrefix(serviceId),
                         aggregatesMap,
-                        aggregatesMap -> aggregatesMap.get(serviceId) == null ?
-                                null : aggregatesMap.get(serviceId).getOperationsCount())
+                        aggregatesMap -> aggregatesMap.get(serviceId).getOperationsCount())
                 .description("The value of operations count for the service " + serviceId)
                 .baseUnit(BASE_UNIT)
                 .register(registry);
@@ -107,8 +105,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
         Gauge registerSuccessOperCount =
                 Gauge.builder(SUCCESS_OPER_COUNT_GAUGE_NAME + replacePrefix(serviceId),
                         aggregatesMap,
-                        aggregatesMap -> aggregatesMap.get(serviceId) == null ?
-                                null : aggregatesMap.get(serviceId).getSuccessOperationsCount())
+                        aggregatesMap -> aggregatesMap.get(serviceId).getSuccessOperationsCount())
                 .tags(emptyList())
                 .description("The value of success operations count for the service " + serviceId)
                 .baseUnit(BASE_UNIT)
@@ -122,8 +119,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
         Gauge registerRunningOperCount =
                 Gauge.builder(RUNNING_OPER_COUNT_GAUGE_NAME + replacePrefix(serviceId),
                         aggregatesMap,
-                        aggregatesMap -> aggregatesMap.get(serviceId) == null ?
-                                null :  aggregatesMap.get(serviceId).getRunningOperationsCount())
+                        aggregatesMap -> aggregatesMap.get(serviceId).getRunningOperationsCount())
                 .tags(emptyList())
                 .description("The value of running operations count for the service " + serviceId)
                 .baseUnit(BASE_UNIT)
@@ -137,8 +133,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
         Gauge registerErrorOperCount =
                 Gauge.builder(ERROR_OPER_COUNT_GAUGE_NAME + replacePrefix(serviceId),
                         aggregatesMap,
-                        aggregatesMap -> aggregatesMap.get(serviceId) == null ?
-                                null :  aggregatesMap.get(serviceId).getErrorOperationsCount())
+                        aggregatesMap -> aggregatesMap.get(serviceId).getErrorOperationsCount())
                 .tags(emptyList())
                 .description("The value of error operations count for the service " + serviceId)
                 .baseUnit(BASE_UNIT)
@@ -152,8 +147,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
         Gauge registerOvertimeOperCount =
                 Gauge.builder(OVERTIME_OPER_COUNT_GAUGE_NAME + replacePrefix(serviceId),
                         aggregatesMap,
-                        aggregatesMap -> aggregatesMap.get(serviceId) == null ?
-                                null :  aggregatesMap.get(serviceId).getOvertimeOperationsCount())
+                        aggregatesMap -> aggregatesMap.get(serviceId).getOvertimeOperationsCount())
                 .tags(emptyList())
                 .description("The value of overtime operations count for the service " + serviceId)
                 .baseUnit(BASE_UNIT)
@@ -167,8 +161,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
         Gauge registerConfigSlidingWindowSize =
                 Gauge.builder(CONFIG_SLIDING_WINDOW_GAUGE_NAME + replacePrefix(serviceId),
                               serviceConfigMap,
-                              serviceConfigMap -> aggregatesMap.get(serviceId) == null ?
-                                      null : serviceConfigMap.get(serviceId).getSlidingWindow())
+                              serviceConfigMap -> serviceConfigMap.get(serviceId).getSlidingWindow())
                         .tags(emptyList())
                         .description("The value of sliding window for the service " + serviceId)
                         .baseUnit(TIME_UNIT)
@@ -182,8 +175,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
         Gauge registerConfigOperationTimeLimitSize =
                 Gauge.builder(CONFIG_OPERATION_TIME_LIMIT_GAUGE_NAME + replacePrefix(serviceId),
                               serviceConfigMap,
-                              serviceConfigMap -> serviceConfigMap.get(serviceId) == null ?
-                                      null : serviceConfigMap.get(serviceId).getOperationTimeLimit())
+                              serviceConfigMap -> serviceConfigMap.get(serviceId).getOperationTimeLimit())
                         .tags(emptyList())
                         .description("The size of operation time limit for the service " + serviceId)
                         .baseUnit(TIME_UNIT)
@@ -197,8 +189,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
         Gauge registerConfigPreAggregationSize =
                 Gauge.builder(CONFIG_PRE_AGGREGATION_SIZE_GAUGE_NAME + replacePrefix(serviceId),
                               serviceConfigMap,
-                              serviceConfigMap -> serviceConfigMap.get(serviceId) == null ?
-                                      null : serviceConfigMap.get(serviceId).getPreAggregationSize())
+                              serviceConfigMap -> serviceConfigMap.get(serviceId).getPreAggregationSize())
                         .tags(emptyList())
                         .description("The value of pre-aggregation size for the service " + serviceId)
                         .baseUnit(TIME_UNIT)

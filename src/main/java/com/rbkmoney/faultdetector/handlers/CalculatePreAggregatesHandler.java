@@ -27,6 +27,10 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
 
     @Override
     public void handle(String serviceId) {
+        ServiceSettings settings = serviceSettingsMap.get(serviceId);
+        serviceOperations.cleanUnusualOperations(serviceId, settings);
+        servicePreAggregates.cleanPreAggregares(serviceId, settings);
+
         Map<String, ServiceOperation> serviceOperationMap = serviceOperations.getServiceOperationsMap(serviceId);
         if (serviceOperationMap == null || serviceOperationMap.isEmpty()) {
             //TODO: возможно имеет смысл пустые "тики" добивать
@@ -35,7 +39,6 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
         }
 
         Long currentTimeMillis = System.currentTimeMillis();
-        ServiceSettings settings = serviceSettingsMap.get(serviceId);
 
         PreAggregates preAggregates = new PreAggregates();
         preAggregates.setAggregationTime(currentTimeMillis);
@@ -64,9 +67,6 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
             log.info("New pre-aggregates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
             servicePreAggregates.addPreAggregates(serviceId, preAggregates);
         }
-
-        serviceOperations.cleanUnusualOperations(serviceId, settings);
-        servicePreAggregates.cleanPreAggregares(serviceId, settings);
 
         calculateAggregatesHandler.handle(serviceId);
     }

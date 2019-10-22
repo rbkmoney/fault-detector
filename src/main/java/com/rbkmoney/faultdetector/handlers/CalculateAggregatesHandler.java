@@ -40,7 +40,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
             double failureRate = ((double) failureOperationsCount / preAggregates.getOperationsCount()) * weight;
             failureRateSum += failureRate;
             weightSum += weight;
-            log.info("Step pre-aggregation {} for the service '{}'. Params: overtimeOperationsCount - {}, " +
+            log.debug("Step pre-aggregation {} for the service '{}'. Params: overtimeOperationsCount - {}, " +
                             "errorOperationsCount - {}, operationsCount - {}, failureRate - {}, failureRateSum - {}, " +
                             "weightSum - {}. Time label: {} ", weight, serviceId, overtimeOperationsCount,
                     errorOperationsCount, preAggregates.getOperationsCount(), failureRate, failureRateSum, weightSum,
@@ -49,6 +49,8 @@ public class CalculateAggregatesHandler implements Handler<String> {
         }
 
         double failureRate = weightSum == 0 ? 0 : failureRateSum / weightSum;
+        log.info("Failure rate for service {} with time label {} = {} (failure rate sum = {}, weight sum = {})",
+                serviceId, aggregationTime, failureRate, failureRateSum, weightSum);
 
         ServiceAggregates serviceAggregates =
                 getServiceAggregates(serviceId, failureRate, preAggregatesDeque, aggregationTime);

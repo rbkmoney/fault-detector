@@ -27,6 +27,8 @@ public class ServicePreAggregates {
     public void cleanPreAggregares(String serviceId, ServiceSettings settings) {
         if (servicePreAggregatesMap.containsKey(serviceId)) {
             Deque<PreAggregates> preAggregates = servicePreAggregatesMap.get(serviceId);
+            log.info("Total pre-aggregates before clean operation for service {}: {}",
+                    serviceId, preAggregates == null ? 0 : preAggregates.size());
             if (preAggregates != null) {
                 long currentTime = System.currentTimeMillis();
                 long slidingWindow = settings.getSlidingWindow();
@@ -36,6 +38,8 @@ public class ServicePreAggregates {
                 log.info("Clean pre-aggregates for service '{}' finished. Count of items after clean: {}",
                         serviceId, preAggregates.size());
             }
+        } else {
+            log.error("Pre-aggregates for clean operation for service {} not found", serviceId);
         }
 
         if (servicePreAggregatesMap.get(serviceId).isEmpty()) {

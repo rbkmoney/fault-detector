@@ -122,6 +122,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
             if (serviceSettings != null && serviceAggregates != null) {
                 long slidingWindow = serviceSettings.getSlidingWindow();
                 if (System.currentTimeMillis() - serviceAggregates.getAggregateTime() > slidingWindow) {
+                    metrics.removeAggregatesMetrics(serviceId);
                     aggregatesMap.remove(serviceId);
                 }
             }

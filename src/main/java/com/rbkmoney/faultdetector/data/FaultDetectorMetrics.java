@@ -27,6 +27,7 @@ public class FaultDetectorMetrics {
     private static final int MAX_SERVICE_METER_MAP_SIZE = 100;
 
     public void addAggregatesMetrics(String serviceId) {
+        log.info("Add gauge metrics for the service {} get started");
         if (serviceMetersMap.containsKey(serviceId)) {
             log.info("A gauge metrics for the service {} already exists", serviceId);
             return;
@@ -43,7 +44,7 @@ public class FaultDetectorMetrics {
                 log.error("Error received while adding metrics for service {}", serviceId, ex);
             }
 
-            log.info("Add gauge metrics for the service {}", serviceId);
+            log.info("Gauge metrics for the service {} was added", serviceId);
         }
     }
 
