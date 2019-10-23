@@ -74,6 +74,7 @@ public class ServiceOperations {
     public void cleanUnusualOperations(String serviceId, ServiceSettings settings) {
         if (settings == null || serviceId == null) {
             log.error("Service settings cannot be null!");
+            return;
         }
         long currentTimeMillis = System.currentTimeMillis();
         Map<String, ServiceOperation> serviceEventMap = getServiceOperationsMap(serviceId);
