@@ -30,7 +30,6 @@ public class FaultDetectorMetrics {
         log.info("Add gauge metrics for the service {} get started");
         if (serviceMetersMap.containsKey(serviceId)) {
             log.info("A gauge metrics for the service {} already exists", serviceId);
-            return;
         } else {
             if (serviceMetersMap.size() > MAX_SERVICE_METER_MAP_SIZE) {
                 log.warn("Service meter map is bigger then expected. New metrics for service {} won't added");
@@ -51,7 +50,7 @@ public class FaultDetectorMetrics {
     public void removeAggregatesMetrics(String serviceId) {
         List<Meter.Id> serviceMeters = serviceMetersMap.get(serviceId);
         if (serviceMeters != null && serviceId != null) {
-            serviceMeters.forEach(meterId -> registry.remove(meterId));
+            serviceMeters.forEach(registry::remove);
             serviceMetersMap.remove(serviceId);
             log.info("Remove gauge metrics for the service {} complete", serviceId);
         } else {

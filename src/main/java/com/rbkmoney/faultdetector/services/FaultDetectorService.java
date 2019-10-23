@@ -131,8 +131,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
     }
 
     private static boolean isEmptyOperation(Operation operation) {
-        return (operation == null || operation.getOperationId() == null || operation.getState() == null) ?
-                true : false;
+        return (operation == null || operation.getOperationId() == null || operation.getState() == null);
     }
 
 }
