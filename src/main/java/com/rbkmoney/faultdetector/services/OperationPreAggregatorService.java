@@ -16,7 +16,7 @@ public class OperationPreAggregatorService {
 
     private final ServiceOperations serviceOperations;
 
-    @Scheduled(fixedRateString = "${operations.pre-aggregation-period}")
+    @Scheduled(fixedRateString = "${operations.preAggregationPeriod}")
     public void process() {
         for (String serviceId : serviceOperations.getServices()) {
             try {

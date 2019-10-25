@@ -3,6 +3,7 @@ package com.rbkmoney.faultdetector.handlers;
 import com.rbkmoney.faultdetector.data.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -22,6 +23,9 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
     private final ServiceOperations serviceOperations;
 
     private final Handler<String> calculateAggregatesHandler;
+
+    @Value("${operations.useServiceConfigPreAggregationPeriod}")
+    private boolean useServiceConfigPreAggregationPeriod;
 
     private static final long MILLS_IN_SECOND = 1000L;
 
@@ -52,8 +56,9 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
         Deque<PreAggregates> preAggregatesDeque = servicePreAggregates.getPreAggregatesDeque(serviceId);
         long preAggSize = settings.getPreAggregationSize() * MILLS_IN_SECOND;
 
-        if (preAggregatesDeque != null &&
-                currentTimeMillis - preAggregatesDeque.getFirst().getAggregationTime() < preAggSize) {
+        if (useServiceConfigPreAggregationPeriod
+                && preAggregatesDeque != null
+                && currentTimeMillis - preAggregatesDeque.getFirst().getAggregationTime() < preAggSize) {
             PreAggregates lastPreAggregates = preAggregatesDeque.getFirst();
             log.info("Merge pre-aggregates for service '{}' : old - {} and additional - {}", serviceId,
                     lastPreAggregates, preAggregates);
