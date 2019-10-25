@@ -24,7 +24,7 @@ public class FaultDetectorMetrics {
 
     private final Map<String, List<Meter.Id>> serviceMetersMap = new ConcurrentHashMap<>();
 
-    private static final int MAX_SERVICE_METER_MAP_SIZE = 100;
+    private static final int MAX_SERVICE_METER_MAP_SIZE = 300;
 
     public void addAggregatesMetrics(String serviceId) {
         log.info("Add gauge metrics for the service {} get started");
