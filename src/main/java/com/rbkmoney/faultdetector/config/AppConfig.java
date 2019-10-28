@@ -20,7 +20,7 @@ public class AppConfig {
 
     private final ServiceOperations serviceOperations = new ServiceOperations();
 
-    @Value("${operations.scheduler-pool-size}")
+    @Value("${operations.schedulerPoolSize}")
     private int schedulerPoolSize;
 
     @Bean

@@ -9,7 +9,6 @@ import org.apache.thrift.TException;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;

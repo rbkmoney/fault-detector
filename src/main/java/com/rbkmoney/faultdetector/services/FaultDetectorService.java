@@ -122,6 +122,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
             if (serviceSettings != null && serviceAggregates != null) {
                 long slidingWindow = serviceSettings.getSlidingWindow();
                 if (System.currentTimeMillis() - serviceAggregates.getAggregateTime() > slidingWindow) {
+                    metrics.removeAggregatesMetrics(serviceId);
                     aggregatesMap.remove(serviceId);
                 }
             }
@@ -130,8 +131,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
     }
 
     private static boolean isEmptyOperation(Operation operation) {
-        return (operation == null || operation.getOperationId() == null || operation.getState() == null) ?
-                true : false;
+        return (operation == null || operation.getOperationId() == null || operation.getState() == null);
     }
 
 }

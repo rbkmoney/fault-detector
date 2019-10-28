@@ -30,7 +30,7 @@ public abstract class AbstractIntegrationTest {
             TestPropertyValues
                     .of("kafka.bootstrap.servers=" + kafka.getBootstrapServers(),
                             "kafka.ssl.enable=false",
-                            "operations.pre-aggregation-period=600000")
+                            "operations.preAggregationPeriod=600000")
                     .applyTo(configurableApplicationContext.getEnvironment());
         }
 

@@ -3,6 +3,7 @@ package com.rbkmoney.faultdetector.handlers;
 import com.rbkmoney.faultdetector.data.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -23,10 +24,16 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
 
     private final Handler<String> calculateAggregatesHandler;
 
+    @Value("${operations.useServiceConfigPreAggregationPeriod}")
+    private boolean useServiceConfigPreAggregationPeriod;
+
     private static final long MILLS_IN_SECOND = 1000L;
 
     @Override
     public void handle(String serviceId) {
+        ServiceSettings settings = serviceSettingsMap.get(serviceId);
+        serviceOperations.cleanUnusualOperations(serviceId, settings);
+
         Map<String, ServiceOperation> serviceOperationMap = serviceOperations.getServiceOperationsMap(serviceId);
         if (serviceOperationMap == null || serviceOperationMap.isEmpty()) {
             //TODO: возможно имеет смысл пустые "тики" добивать
@@ -35,7 +42,6 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
         }
 
         Long currentTimeMillis = System.currentTimeMillis();
-        ServiceSettings settings = serviceSettingsMap.get(serviceId);
 
         PreAggregates preAggregates = new PreAggregates();
         preAggregates.setAggregationTime(currentTimeMillis);
@@ -50,8 +56,9 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
         Deque<PreAggregates> preAggregatesDeque = servicePreAggregates.getPreAggregatesDeque(serviceId);
         long preAggSize = settings.getPreAggregationSize() * MILLS_IN_SECOND;
 
-        if (preAggregatesDeque != null &&
-                currentTimeMillis - preAggregatesDeque.getFirst().getAggregationTime() < preAggSize) {
+        if (useServiceConfigPreAggregationPeriod
+                && preAggregatesDeque != null
+                && currentTimeMillis - preAggregatesDeque.getFirst().getAggregationTime() < preAggSize) {
             PreAggregates lastPreAggregates = preAggregatesDeque.getFirst();
             log.info("Merge pre-aggregates for service '{}' : old - {} and additional - {}", serviceId,
                     lastPreAggregates, preAggregates);
@@ -65,9 +72,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
             servicePreAggregates.addPreAggregates(serviceId, preAggregates);
         }
 
-        serviceOperations.cleanUnusualOperations(serviceId, settings);
         servicePreAggregates.cleanPreAggregares(serviceId, settings);
-
         calculateAggregatesHandler.handle(serviceId);
     }
 
