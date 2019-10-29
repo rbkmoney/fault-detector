@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.rbkmoney.faultdetector.utils.GaugeMetricsUtils.*;
 import static java.util.Collections.emptyList;
 
 @Slf4j
@@ -25,36 +26,6 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
     private final Map<String, List<Meter.Id>> serviceMetersMap;
 
     private final String serviceId;
-
-    private static final String GAUGE_PREFEX = "fd.aggregates.";
-
-    private static final String FAILURE_GAUGE_NAME = GAUGE_PREFEX + "failure.rate_";
-
-    private static final String OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "operations.count_";
-
-    private static final String SUCCESS_OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "success.count_";
-
-    private static final String RUNNING_OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "running.count_";
-
-    private static final String ERROR_OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "error.count_";
-
-    private static final String OVERTIME_OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "overtime.count_";
-
-    private static final String CONFIG_SLIDING_WINDOW_GAUGE_NAME = GAUGE_PREFEX + "config.slidingWindow_";
-
-    private static final String CONFIG_OPERATION_TIME_LIMIT_GAUGE_NAME = GAUGE_PREFEX + "config.operationTimeLimit_";
-
-    private static final String CONFIG_PRE_AGGREGATION_SIZE_GAUGE_NAME = GAUGE_PREFEX + "config.preAggregationSize_";
-
-    private static final String BASE_UNIT = "value";
-
-    private static final String TIME_UNIT = "ms";
-
-    private static final String OLD_SERVICE_PREFIX = "hellgate_service.adapter_availability.";
-
-    private static final String NEW_SERVICE_PREFIX = "provider_id_";
-
-    private static final String GAUGE_LOG_PATTERN = "Gauge {} was added";
 
     @Override
     public void bindTo(MeterRegistry registry) {
@@ -171,7 +142,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                         .tags(emptyList())
                         .description("The value of sliding window for the service " + serviceId)
                         .baseUnit(TIME_UNIT)
-                        .strongReference(true)
+                        .strongReference(false)
                         .register(registry);
 
         log.info(GAUGE_LOG_PATTERN, CONFIG_SLIDING_WINDOW_GAUGE_NAME + serviceId);
@@ -186,7 +157,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                         .tags(emptyList())
                         .description("The size of operation time limit for the service " + serviceId)
                         .baseUnit(TIME_UNIT)
-                        .strongReference(true)
+                        .strongReference(false)
                         .register(registry);
 
         log.info(GAUGE_LOG_PATTERN, CONFIG_OPERATION_TIME_LIMIT_GAUGE_NAME + serviceId);
@@ -201,7 +172,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                         .tags(emptyList())
                         .description("The value of pre-aggregation size for the service " + serviceId)
                         .baseUnit(TIME_UNIT)
-                        .strongReference(true)
+                        .strongReference(false)
                         .register(registry);
 
         log.info(GAUGE_LOG_PATTERN, CONFIG_PRE_AGGREGATION_SIZE_GAUGE_NAME + serviceId);

@@ -24,17 +24,11 @@ public class FaultDetectorMetrics {
 
     private final Map<String, List<Meter.Id>> serviceMetersMap = new ConcurrentHashMap<>();
 
-    private static final int MAX_SERVICE_METER_MAP_SIZE = 300;
-
     public void addAggregatesMetrics(String serviceId) {
         log.info("Add gauge metrics for the service {} get started");
         if (serviceMetersMap.containsKey(serviceId)) {
-            log.info("A gauge metrics for the service {} already exists", serviceId);
+            log.debug("A gauge metrics for the service {} already exists", serviceId);
         } else {
-            if (serviceMetersMap.size() > MAX_SERVICE_METER_MAP_SIZE) {
-                log.warn("Service meter map is bigger then expected. New metrics for service {} won't added");
-                return;
-            }
             try {
                 MeterBinder faultDetectorMetricsBinder =
                         new FaultDetectorMetricsBinder(aggregatesMap, serviceConfigMap, serviceMetersMap, serviceId);
@@ -43,7 +37,8 @@ public class FaultDetectorMetrics {
                 log.error("Error received while adding metrics for service {}", serviceId, ex);
             }
 
-            log.info("Gauge metrics for the service {} was added", serviceId);
+            log.info("Gauge metrics for the service {} was added. Service meter map size is {}. Registry meter size is {}",
+                    serviceId, serviceMetersMap.size(), registry.getMeters().size());
         }
     }
 
@@ -51,6 +46,7 @@ public class FaultDetectorMetrics {
         List<Meter.Id> serviceMeters = serviceMetersMap.get(serviceId);
         if (serviceMeters != null && serviceId != null) {
             serviceMeters.forEach(registry::remove);
+            serviceMetersMap.get(serviceId).clear();
             serviceMetersMap.remove(serviceId);
             log.info("Remove gauge metrics for the service {} complete", serviceId);
         } else {

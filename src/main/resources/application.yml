@@ -9,8 +9,8 @@ info:
   stage: dev
 
 operations:
-  preAggregationPeriod: 1000
-  useServiceConfigPreAggregationPeriod: true
+  preAggregationPeriod: 5000
+  useServiceConfigPreAggregationPeriod: false
   schedulerPoolSize: 2
 
 kafka:
