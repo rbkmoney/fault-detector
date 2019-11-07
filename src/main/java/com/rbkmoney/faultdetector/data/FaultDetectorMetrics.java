@@ -25,7 +25,7 @@ public class FaultDetectorMetrics {
     private final Map<String, List<Meter.Id>> serviceMetersMap = new ConcurrentHashMap<>();
 
     public void addAggregatesMetrics(String serviceId) {
-        log.info("Add gauge metrics for the service {} get started");
+        log.info("Add gauge metrics for the service {} get started", serviceId);
         if (serviceMetersMap.containsKey(serviceId)) {
             log.debug("A gauge metrics for the service {} already exists", serviceId);
         } else {

@@ -27,12 +27,11 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
     @Value("${operations.useServiceConfigPreAggregationPeriod}")
     private boolean useServiceConfigPreAggregationPeriod;
 
-    private static final long MILLS_IN_SECOND = 1000L;
+    private static final long MILLS_IN_SECOND = 1_000L;
 
     @Override
     public void handle(String serviceId) {
         ServiceSettings settings = serviceSettingsMap.get(serviceId);
-        serviceOperations.cleanUnusualOperations(serviceId, settings);
 
         Map<String, ServiceOperation> serviceOperationMap = serviceOperations.getServiceOperationsMap(serviceId);
         if (serviceOperationMap == null || serviceOperationMap.isEmpty()) {
@@ -53,11 +52,24 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
             serviceOperationMap.remove(operationId);
         }
 
+        if (useServiceConfigPreAggregationPeriod) {
+            preparePreAggregatesWithDynamicWindowSize(serviceId, preAggregates, settings);
+        } else {
+            log.info("New pre-aggregates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
+            servicePreAggregates.addPreAggregates(serviceId, preAggregates);
+        }
+
+        calculateAggregatesHandler.handle(serviceId);
+    }
+
+    private void preparePreAggregatesWithDynamicWindowSize(String serviceId,
+                                                           PreAggregates preAggregates,
+                                                           ServiceSettings settings) {
         Deque<PreAggregates> preAggregatesDeque = servicePreAggregates.getPreAggregatesDeque(serviceId);
         long preAggSize = settings.getPreAggregationSize() * MILLS_IN_SECOND;
+        Long currentTimeMillis = preAggregates.getAggregationTime();
 
-        if (useServiceConfigPreAggregationPeriod
-                && preAggregatesDeque != null
+        if (preAggregatesDeque != null
                 && currentTimeMillis - preAggregatesDeque.getFirst().getAggregationTime() < preAggSize) {
             PreAggregates lastPreAggregates = preAggregatesDeque.getFirst();
             log.info("Merge pre-aggregates for service '{}' : old - {} and additional - {}", serviceId,
@@ -71,9 +83,6 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
             log.info("New pre-aggregates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
             servicePreAggregates.addPreAggregates(serviceId, preAggregates);
         }
-
-        servicePreAggregates.cleanPreAggregares(serviceId, settings);
-        calculateAggregatesHandler.handle(serviceId);
     }
 
     private String prepareOperation(ServiceOperation serviceOperation,

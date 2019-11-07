@@ -17,6 +17,8 @@ public class CalculateAggregatesHandler implements Handler<String> {
 
     private final ServicePreAggregates servicePreAggregates;
 
+    private final Map<String, ServiceSettings> serviceSettingsMap;
+
     @Override
     public void handle(String serviceId) {
         log.info("Start processing the service statistics for service '{}'", serviceId);
@@ -56,6 +58,9 @@ public class CalculateAggregatesHandler implements Handler<String> {
                 getServiceAggregates(serviceId, failureRate, preAggregatesDeque, aggregationTime);
         serviceAggregatesMap.put(serviceId, serviceAggregates);
 
+        ServiceSettings settings = serviceSettingsMap.get(serviceId);
+        //serviceOperations.cleanUnusualOperations(serviceId, settings);
+        servicePreAggregates.cleanPreAggregares(serviceId, settings);
         log.info("Processing the service statistics for service '{}' was finished", serviceId);
     }
 
