@@ -9,7 +9,7 @@ info:
   stage: dev
 
 operations:
-  preAggregationPeriod: 5000
+  preAggregationPeriod: 2000
   useServiceConfigPreAggregationPeriod: false
   schedulerPoolSize: 2
 
