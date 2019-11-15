@@ -48,6 +48,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
         if (!serviceConfigMap.containsKey(serviceId) || !serviceOperations.containsService(serviceId)) {
             log.warn("Service {} is not initialized. It will be re-initialized", serviceId);
             initService(serviceId, serviceConfig);
+            metrics.addAggregatesMetrics(serviceId);
         }
         if (isEmptyOperation(operation)) {
             log.error("Received empty operation for service '{}'", serviceId);
@@ -102,8 +103,6 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
                     stat.setErrorOperationsCount(aggregates.getErrorOperationsCount());
                     stat.setSuccessOperationsCount(aggregates.getSuccessOperationsCount());
                     serviceStatisticsList.add(stat);
-
-                    metrics.addAggregatesMetrics(serviceId);
                 }
             }
             clearUnusualAggregates();
@@ -122,7 +121,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
             if (serviceSettings != null && serviceAggregates != null) {
                 long slidingWindow = serviceSettings.getSlidingWindow();
                 if (System.currentTimeMillis() - serviceAggregates.getAggregateTime() > slidingWindow) {
-                    metrics.removeAggregatesMetrics(serviceId);
+                    //metrics.removeAggregatesMetrics(serviceId);
                     aggregatesMap.remove(serviceId);
                 }
             }
