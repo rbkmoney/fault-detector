@@ -1,7 +1,6 @@
 package com.rbkmoney.faultdetector.data;
 
 import io.micrometer.core.instrument.Gauge;
-import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import lombok.RequiredArgsConstructor;
@@ -23,13 +22,13 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
 
     private final Map<String, ServiceSettings> serviceConfigMap;
 
-    private final Map<String, List<Meter.Id>> serviceMetersMap;
+    private final Map<String, List<Gauge>> serviceMetersMap;
 
     private final String serviceId;
 
     @Override
     public void bindTo(MeterRegistry registry) {
-        List<Meter.Id> meterIds = new ArrayList<>();
+        List<Gauge> meterIds = new ArrayList<>();
         meterIds.add(registerFailureRateMetrics(registry));
         meterIds.add(registerOperCountMetrics(registry));
         meterIds.add(registerSuccessOperCountMetrics(registry));
@@ -46,7 +45,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
         log.info("Metric registry after adding gauges for the service {}: {}", serviceId, metersList);
     }
 
-    private Meter.Id registerFailureRateMetrics(MeterRegistry registry) {
+    private Gauge registerFailureRateMetrics(MeterRegistry registry) {
         Gauge registerFailureRate =
                 Gauge.builder(FAILURE_GAUGE_NAME + replacePrefix(serviceId),
                         aggregatesMap,
@@ -57,10 +56,10 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                 .register(registry);
 
         log.info(GAUGE_LOG_PATTERN, FAILURE_GAUGE_NAME + serviceId);
-        return registerFailureRate.getId();
+        return registerFailureRate;
     }
 
-    private Meter.Id registerOperCountMetrics(MeterRegistry registry) {
+    private Gauge registerOperCountMetrics(MeterRegistry registry) {
         Gauge registerOperCount =
                 Gauge.builder(OPER_COUNT_GAUGE_NAME + replacePrefix(serviceId),
                         aggregatesMap,
@@ -71,10 +70,10 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                 .register(registry);
 
         log.info(GAUGE_LOG_PATTERN, OPER_COUNT_GAUGE_NAME + serviceId);
-        return registerOperCount.getId();
+        return registerOperCount;
     }
 
-    private Meter.Id registerSuccessOperCountMetrics(MeterRegistry registry) {
+    private Gauge registerSuccessOperCountMetrics(MeterRegistry registry) {
         Gauge registerSuccessOperCount =
                 Gauge.builder(SUCCESS_OPER_COUNT_GAUGE_NAME + replacePrefix(serviceId),
                         aggregatesMap,
@@ -86,10 +85,10 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                 .register(registry);
 
         log.info(GAUGE_LOG_PATTERN, SUCCESS_OPER_COUNT_GAUGE_NAME + serviceId);
-        return registerSuccessOperCount.getId();
+        return registerSuccessOperCount;
     }
 
-    private Meter.Id registerRunningOperCountMetrics(MeterRegistry registry) {
+    private Gauge registerRunningOperCountMetrics(MeterRegistry registry) {
         Gauge registerRunningOperCount =
                 Gauge.builder(RUNNING_OPER_COUNT_GAUGE_NAME + replacePrefix(serviceId),
                         aggregatesMap,
@@ -101,10 +100,10 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                 .register(registry);
 
         log.info(GAUGE_LOG_PATTERN, RUNNING_OPER_COUNT_GAUGE_NAME + serviceId);
-        return registerRunningOperCount.getId();
+        return registerRunningOperCount;
     }
 
-    private Meter.Id registerErrorOperCountMetrics(MeterRegistry registry) {
+    private Gauge registerErrorOperCountMetrics(MeterRegistry registry) {
         Gauge registerErrorOperCount =
                 Gauge.builder(ERROR_OPER_COUNT_GAUGE_NAME + replacePrefix(serviceId),
                         aggregatesMap,
@@ -116,10 +115,10 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                 .register(registry);
 
         log.info(GAUGE_LOG_PATTERN, ERROR_OPER_COUNT_GAUGE_NAME + serviceId);
-        return registerErrorOperCount.getId();
+        return registerErrorOperCount;
     }
 
-    private Meter.Id registerOvertimeOperCountMetrics(MeterRegistry registry) {
+    private Gauge registerOvertimeOperCountMetrics(MeterRegistry registry) {
         Gauge registerOvertimeOperCount =
                 Gauge.builder(OVERTIME_OPER_COUNT_GAUGE_NAME + replacePrefix(serviceId),
                         aggregatesMap,
@@ -131,10 +130,10 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                 .register(registry);
 
         log.info(GAUGE_LOG_PATTERN, OVERTIME_OPER_COUNT_GAUGE_NAME + serviceId);
-        return registerOvertimeOperCount.getId();
+        return registerOvertimeOperCount;
     }
 
-    private Meter.Id registerConfigSlidingWindow(MeterRegistry registry) {
+    private Gauge registerConfigSlidingWindow(MeterRegistry registry) {
         Gauge registerConfigSlidingWindowSize =
                 Gauge.builder(CONFIG_SLIDING_WINDOW_GAUGE_NAME + replacePrefix(serviceId),
                               serviceConfigMap,
@@ -146,10 +145,10 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                         .register(registry);
 
         log.info(GAUGE_LOG_PATTERN, CONFIG_SLIDING_WINDOW_GAUGE_NAME + serviceId);
-        return registerConfigSlidingWindowSize.getId();
+        return registerConfigSlidingWindowSize;
     }
 
-    private Meter.Id registerConfigOperationTimeLimit(MeterRegistry registry) {
+    private Gauge registerConfigOperationTimeLimit(MeterRegistry registry) {
         Gauge registerConfigOperationTimeLimitSize =
                 Gauge.builder(CONFIG_OPERATION_TIME_LIMIT_GAUGE_NAME + replacePrefix(serviceId),
                               serviceConfigMap,
@@ -161,10 +160,10 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                         .register(registry);
 
         log.info(GAUGE_LOG_PATTERN, CONFIG_OPERATION_TIME_LIMIT_GAUGE_NAME + serviceId);
-        return registerConfigOperationTimeLimitSize.getId();
+        return registerConfigOperationTimeLimitSize;
     }
 
-    private Meter.Id registerConfigPreAggregationSize(MeterRegistry registry) {
+    private Gauge registerConfigPreAggregationSize(MeterRegistry registry) {
         Gauge registerConfigPreAggregationSize =
                 Gauge.builder(CONFIG_PRE_AGGREGATION_SIZE_GAUGE_NAME + replacePrefix(serviceId),
                               serviceConfigMap,
@@ -176,7 +175,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                         .register(registry);
 
         log.info(GAUGE_LOG_PATTERN, CONFIG_PRE_AGGREGATION_SIZE_GAUGE_NAME + serviceId);
-        return registerConfigPreAggregationSize.getId();
+        return registerConfigPreAggregationSize;
     }
 
     private static String replacePrefix(String serviceId) {

@@ -1,6 +1,6 @@
 package com.rbkmoney.faultdetector.data;
 
-import io.micrometer.core.instrument.Meter;
+import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +22,13 @@ public class FaultDetectorMetrics {
 
     private final MeterRegistry registry;
 
-    private final Map<String, List<Meter.Id>> serviceMetersMap = new ConcurrentHashMap<>();
+    private final Map<String, List<Gauge>> serviceMetersMap = new ConcurrentHashMap<>();
 
     public void addAggregatesMetrics(String serviceId) {
         log.info("Add gauge metrics for the service {} get started", serviceId);
-        if (serviceMetersMap.containsKey(serviceId)) {
+        if (serviceMetersMap.containsKey(serviceId)
+                && serviceMetersMap.get(serviceId) != null
+                && serviceMetersMap.get(serviceId).stream().allMatch(gauge -> gauge != null) ) {
             log.debug("A gauge metrics for the service {} already exists", serviceId);
         } else {
             try {
@@ -43,7 +45,7 @@ public class FaultDetectorMetrics {
     }
 
     public void removeAggregatesMetrics(String serviceId) {
-        List<Meter.Id> serviceMeters = serviceMetersMap.get(serviceId);
+        List<Gauge> serviceMeters = serviceMetersMap.get(serviceId);
         if (serviceMeters != null && serviceId != null) {
             serviceMeters.forEach(registry::remove);
             serviceMetersMap.get(serviceId).clear();
