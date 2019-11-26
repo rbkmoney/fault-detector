@@ -8,6 +8,8 @@ import org.springframework.boot.actuate.autoconfigure.metrics.export.properties.
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
+import static io.micrometer.shaded.io.netty.util.internal.StringUtil.EMPTY_STRING;
+
 class GraphitePropertiesConfigAdapter extends PropertiesConfigAdapter<GraphiteProperties>
         implements GraphiteConfig {
 
@@ -17,7 +19,7 @@ class GraphitePropertiesConfigAdapter extends PropertiesConfigAdapter<GraphitePr
 
     @Override
     public String get(String key) {
-        return null;
+        return EMPTY_STRING;
     }
 
     @Override

@@ -73,7 +73,7 @@ public class AppConfig {
         try {
             return new GraphiteMeterRegistry(fdGraphiteConfig, clock);
         } catch (Exception ex) {
-            log.error("Received error in GraphiteMeterRegistry: ", ex);
+            log.error("Received error in GraphiteMeterRegistry", ex);
             throw ex;
         }
     }
