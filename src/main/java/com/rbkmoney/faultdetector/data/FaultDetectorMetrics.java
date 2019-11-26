@@ -1,8 +1,8 @@
 package com.rbkmoney.faultdetector.data;
 
 import io.micrometer.core.instrument.Gauge;
-import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
+import io.micrometer.graphite.GraphiteMeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ public class FaultDetectorMetrics {
 
     private final Map<String, ServiceSettings> serviceConfigMap;
 
-    private final MeterRegistry registry;
+    private final GraphiteMeterRegistry fdGraphiteMeterRegistry;
 
     private final Map<String, List<Gauge>> serviceMetersMap = new ConcurrentHashMap<>();
 
@@ -29,25 +29,25 @@ public class FaultDetectorMetrics {
         if (serviceMetersMap.containsKey(serviceId)
                 && serviceMetersMap.get(serviceId) != null
                 && serviceMetersMap.get(serviceId).stream().allMatch(gauge -> gauge != null) ) {
-            log.debug("A gauge metrics for the service {} already exists", serviceId);
+            log.info("A gauge metrics for the service {} already exists", serviceId);
         } else {
             try {
                 MeterBinder faultDetectorMetricsBinder =
                         new FaultDetectorMetricsBinder(aggregatesMap, serviceConfigMap, serviceMetersMap, serviceId);
-                faultDetectorMetricsBinder.bindTo(registry);
+                faultDetectorMetricsBinder.bindTo(fdGraphiteMeterRegistry);
             } catch (Exception ex) {
                 log.error("Error received while adding metrics for service {}", serviceId, ex);
             }
 
             log.info("Gauge metrics for the service {} was added. Service meter map size is {}. Registry meter size is {}",
-                    serviceId, serviceMetersMap.size(), registry.getMeters().size());
+                    serviceId, serviceMetersMap.size(), fdGraphiteMeterRegistry.getMeters().size());
         }
     }
 
     public void removeAggregatesMetrics(String serviceId) {
         List<Gauge> serviceMeters = serviceMetersMap.get(serviceId);
         if (serviceMeters != null && serviceId != null) {
-            serviceMeters.forEach(registry::remove);
+            serviceMeters.forEach(fdGraphiteMeterRegistry::remove);
             serviceMetersMap.get(serviceId).clear();
             serviceMetersMap.remove(serviceId);
             log.info("Remove gauge metrics for the service {} complete", serviceId);
