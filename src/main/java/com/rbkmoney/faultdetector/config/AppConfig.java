@@ -4,13 +4,8 @@ import com.rbkmoney.faultdetector.data.ServiceAggregates;
 import com.rbkmoney.faultdetector.data.ServiceOperations;
 import com.rbkmoney.faultdetector.data.ServicePreAggregates;
 import com.rbkmoney.faultdetector.data.ServiceSettings;
-import io.micrometer.core.instrument.Clock;
-import io.micrometer.graphite.GraphiteConfig;
-import io.micrometer.graphite.GraphiteMeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.actuate.autoconfigure.metrics.export.graphite.GraphiteProperties;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -59,24 +54,5 @@ public class AppConfig {
         taskScheduler.setPoolSize(schedulerPoolSize);
         return taskScheduler;
     }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public GraphiteConfig fdGraphiteConfig(GraphiteProperties graphiteProperties) {
-        return new GraphitePropertiesConfigAdapter(graphiteProperties);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public GraphiteMeterRegistry fdGraphiteMeterRegistry(GraphiteConfig fdGraphiteConfig,
-                                                         Clock clock) {
-        try {
-            return new GraphiteMeterRegistry(fdGraphiteConfig, clock);
-        } catch (Exception ex) {
-            log.error("Received error in GraphiteMeterRegistry", ex);
-            throw ex;
-        }
-    }
-
 
 }

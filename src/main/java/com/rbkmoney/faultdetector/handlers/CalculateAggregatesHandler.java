@@ -39,7 +39,8 @@ public class CalculateAggregatesHandler implements Handler<String> {
             int overtimeOperationsCount = preAggregates.getOvertimeOperationsCount();
             int errorOperationsCount = preAggregates.getErrorOperationsCount();
             int failureOperationsCount = errorOperationsCount + overtimeOperationsCount;
-            double failureRate = ((double) failureOperationsCount / preAggregates.getOperationsCount()) * weight;
+            int totalOperationsCount = failureOperationsCount + preAggregates.getSuccessOperationsCount();
+            double failureRate = ((double) failureOperationsCount / totalOperationsCount) * weight;
             failureRateSum += failureRate;
             weightSum += weight;
             log.debug("Step pre-aggregation {} for the service '{}'. Params: overtimeOperationsCount - {}, " +
@@ -59,8 +60,8 @@ public class CalculateAggregatesHandler implements Handler<String> {
         serviceAggregatesMap.put(serviceId, serviceAggregates);
 
         ServiceSettings settings = serviceSettingsMap.get(serviceId);
-        //serviceOperations.cleanUnusualOperations(serviceId, settings);
         servicePreAggregates.cleanPreAggregares(serviceId, settings);
+        clearUnusualAggregates();
         log.info("Processing the service statistics for service '{}' was finished", serviceId);
     }
 
@@ -86,6 +87,20 @@ public class CalculateAggregatesHandler implements Handler<String> {
         log.info("Last aggregates for service id '{}' by aggregation time {}: {}", serviceId,
                 aggregationTime, serviceAggregates);
         return serviceAggregates;
+    }
+
+    private void clearUnusualAggregates() {
+        for (String serviceId : serviceAggregatesMap.keySet()) {
+            ServiceSettings serviceSettings = serviceSettingsMap.get(serviceId);
+            ServiceAggregates serviceAggregates = serviceAggregatesMap.get(serviceId);
+            if (serviceSettings != null && serviceAggregates != null) {
+                long slidingWindow = serviceSettings.getSlidingWindow();
+                if (System.currentTimeMillis() - serviceAggregates.getAggregateTime() > slidingWindow) {
+                    serviceAggregatesMap.remove(serviceId);
+                }
+            }
+
+        }
     }
 
 }
