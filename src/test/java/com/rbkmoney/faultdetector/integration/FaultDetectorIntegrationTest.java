@@ -43,29 +43,27 @@ public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
         calculatePreAggregatesHandler.handle(serviceId);
 
         sendErrorOperations(serviceId, serviceConfig, startOperations, errorOperationsCount);
-        Thread.sleep(1000);
-        calculatePreAggregatesHandler.handle(serviceId);
-
         sendSuccessFinishOperations(serviceId, serviceConfig, startOperations, successOperationsCount);
         Thread.sleep(1000);
         calculatePreAggregatesHandler.handle(serviceId);
 
+        Thread.sleep(2000);
         List<String> services = new ArrayList<>();
         services.add(serviceId);
         List<ServiceStatistics> statistics = faultDetectorService.getStatistics(services);
 
         assertEquals("The number of statistics items received is not equal to the expected " +
-                "number", 1, statistics.size());
+                "number", 1, statistics == null ? 0 : statistics.size());
 
         ServiceStatistics serviceStatistics = statistics.get(0);
 
         assertEquals("The number of operations is not equal to expected",
-                80, serviceStatistics.getOperationsCount());
+                100, serviceStatistics.getOperationsCount());
         assertEquals("The number of success operations is not equal to expected",
                 80, serviceStatistics.getSuccessOperationsCount());
         assertEquals("The number of error operations is not equal to expected",
-                0, serviceStatistics.getErrorOperationsCount());
-        String expectedFailureRate = "0.07";
+                20, serviceStatistics.getErrorOperationsCount());
+        String expectedFailureRate = "0.13";
         String receivedFailureRate = String.format(Locale.ENGLISH, "%(.2f", serviceStatistics.getFailureRate());
         assertEquals("Failure rate is not equal to expected", expectedFailureRate, receivedFailureRate);
 
@@ -148,7 +146,7 @@ public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
 
     private static ServiceConfig getServiceConfig() {
         ServiceConfig serviceConfig = new ServiceConfig();
-        serviceConfig.setOperationTimeLimit(4000);
+        serviceConfig.setOperationTimeLimit(5000);
         serviceConfig.setSlidingWindow(20000);
         serviceConfig.setPreAggregationSize(2);
         return serviceConfig;

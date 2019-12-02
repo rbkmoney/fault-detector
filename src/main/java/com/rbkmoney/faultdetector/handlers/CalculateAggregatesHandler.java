@@ -40,7 +40,8 @@ public class CalculateAggregatesHandler implements Handler<String> {
             int errorOperationsCount = preAggregates.getErrorOperationsCount();
             int failureOperationsCount = errorOperationsCount + overtimeOperationsCount;
             int totalOperationsCount = failureOperationsCount + preAggregates.getSuccessOperationsCount();
-            double failureRate = ((double) failureOperationsCount / totalOperationsCount) * weight;
+            double failureRate = totalOperationsCount == 0 ?
+                    0 : ((double) failureOperationsCount / totalOperationsCount) * weight;
             failureRateSum += failureRate;
             weightSum += weight;
             log.debug("Step pre-aggregation {} for the service '{}'. Params: overtimeOperationsCount - {}, " +
