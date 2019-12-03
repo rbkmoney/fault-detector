@@ -81,7 +81,7 @@ public class ServiceOperations {
         if (serviceEventMap == null) {
             log.debug("Impossible to clean. Service operation map not found");
         } else {
-            log.debug("Start cleaning unusual operations. Total operations for service {}: {}",
+            log.debug("Start cleaning unused operations. Total operations for service {}: {}",
                     serviceId, serviceEventMap.size());
             int count = 0;
             for (ServiceOperation event : serviceEventMap.values()) {
