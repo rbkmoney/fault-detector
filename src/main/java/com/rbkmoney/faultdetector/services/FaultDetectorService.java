@@ -105,28 +105,12 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
                     serviceStatisticsList.add(stat);
                 }
             }
-            clearUnusualAggregates();
         } catch (Exception ex) {
             log.error("Received error during processing of statistics", ex);
         }
 
         log.info("Statistic for services: {}", serviceStatisticsList);
         return serviceStatisticsList;
-    }
-
-    private void clearUnusualAggregates() {
-        for (String serviceId : aggregatesMap.keySet()) {
-            ServiceSettings serviceSettings = serviceConfigMap.get(serviceId);
-            ServiceAggregates serviceAggregates = aggregatesMap.get(serviceId);
-            if (serviceSettings != null && serviceAggregates != null) {
-                long slidingWindow = serviceSettings.getSlidingWindow();
-                if (System.currentTimeMillis() - serviceAggregates.getAggregateTime() > slidingWindow) {
-                    //metrics.removeAggregatesMetrics(serviceId);
-                    aggregatesMap.remove(serviceId);
-                }
-            }
-
-        }
     }
 
     private static boolean isEmptyOperation(Operation operation) {
