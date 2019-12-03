@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Data
 public class PreAggregates implements Comparable<PreAggregates> {
@@ -37,15 +38,7 @@ public class PreAggregates implements Comparable<PreAggregates> {
 
     private boolean isMerged;
 
-    public void addOperation(String operationId) {
-        operationsSet.add(operationId);
-        operationsCount = operationsSet.size();
-    }
-
-    public void addOperations(List<String> operationIds) {
-        operationsSet.addAll(operationIds);
-        operationsCount = operationsSet.size();
-    }
+    private List<Long> completeOperationsTimings = new CopyOnWriteArrayList<>();
 
     public void addOperations(Set<String> operationIds) {
         operationsSet.addAll(operationIds);
@@ -61,11 +54,6 @@ public class PreAggregates implements Comparable<PreAggregates> {
         overtimeOperationsCount = overtimeOperationsSet.size();
     }
 
-    public void addOvertimeOperations(List<String> operationIds) {
-        overtimeOperationsSet.addAll(operationIds);
-        overtimeOperationsCount = overtimeOperationsSet.size();
-    }
-
     public void addOvertimeOperations(Set<String> operationIds) {
         overtimeOperationsSet.addAll(operationIds);
         overtimeOperationsCount = overtimeOperationsSet.size();
@@ -77,6 +65,17 @@ public class PreAggregates implements Comparable<PreAggregates> {
 
     public void addSuccessOperation() {
         successOperationsCount++;
+    }
+
+    public void addCompleteOperationTime(Long operationTime) {
+        completeOperationsTimings.add(operationTime);
+    }
+
+    public double getCompleteOperationsAvgTime() {
+        return completeOperationsTimings.stream()
+                .mapToDouble(Long::longValue)
+                .average()
+                .orElse(0);
     }
 
     @Override
@@ -108,18 +107,21 @@ public class PreAggregates implements Comparable<PreAggregates> {
         overtimeOperationsSet.clear();
     }
 
-    public PreAggregates copy() {
-        PreAggregates preAggregates = new PreAggregates();
-        preAggregates.setAggregationTime(aggregationTime);
-        preAggregates.setServiceId(serviceId);
-        preAggregates.getOperationsSet().addAll(operationsSet);
-        preAggregates.setRunningOperationsCount(runningOperationsCount);
-        preAggregates.getOvertimeOperationsSet().addAll(overtimeOperationsSet);
-        preAggregates.setErrorOperationsCount(errorOperationsCount);
-        preAggregates.setSuccessOperationsCount(successOperationsCount);
-        preAggregates.setOperationTimeLimit(operationTimeLimit);
-        preAggregates.setSlidingWindow(slidingWindow);
-        preAggregates.setPreAggregationSize(preAggregationSize);
-        return preAggregates;
+    @Override
+    public String toString() {
+        return "PreAggregates{" +
+                "aggregationTime=" + aggregationTime +
+                ", serviceId='" + serviceId +
+                ", operationsCount=" + operationsCount +
+                ", runningOperationsCount=" + runningOperationsCount +
+                ", overtimeOperationsCount=" + overtimeOperationsCount +
+                ", errorOperationsCount=" + errorOperationsCount +
+                ", successOperationsCount=" + successOperationsCount +
+                ", completeOperationsAvgTime=" + getCompleteOperationsAvgTime() +
+                ", operationTimeLimit=" + operationTimeLimit +
+                ", slidingWindow=" + slidingWindow +
+                ", preAggregationSize=" + preAggregationSize +
+                ", isMerged=" + isMerged +
+                '}';
     }
 }

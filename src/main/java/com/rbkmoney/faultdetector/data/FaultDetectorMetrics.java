@@ -1,8 +1,8 @@
 package com.rbkmoney.faultdetector.data;
 
 import io.micrometer.core.instrument.Gauge;
-import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
+import io.micrometer.graphite.GraphiteMeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ public class FaultDetectorMetrics {
 
     private final Map<String, ServiceSettings> serviceConfigMap;
 
-    private final MeterRegistry registry;
+    private final GraphiteMeterRegistry graphiteMeterRegistry;
 
     private final Map<String, List<Gauge>> serviceMetersMap = new ConcurrentHashMap<>();
 
@@ -38,20 +38,20 @@ public class FaultDetectorMetrics {
                 MeterBinder faultDetectorMetricsBinder =
                         new FaultDetectorMetricsBinder(aggregatesMap, serviceConfigMap, serviceMetersMap, serviceId);
                 meters.add(faultDetectorMetricsBinder);
-                //faultDetectorMetricsBinder.bindTo(fdGraphiteMeterRegistry);
+                faultDetectorMetricsBinder.bindTo(graphiteMeterRegistry);
             } catch (Exception ex) {
                 log.error("Error received while adding metrics for service {}", serviceId, ex);
             }
 
             log.info("Gauge metrics for the service {} was added. Service meter map size is {}. Registry meter size is {}",
-                    serviceId, serviceMetersMap.size(), registry.getMeters().size());
+                    serviceId, serviceMetersMap.size(), graphiteMeterRegistry.getMeters().size());
         }
     }
 
     public void removeAggregatesMetrics(String serviceId) {
         List<Gauge> serviceMeters = serviceMetersMap.get(serviceId);
         if (serviceMeters != null && serviceId != null) {
-            serviceMeters.forEach(registry::remove);
+            serviceMeters.forEach(graphiteMeterRegistry::remove);
             serviceMetersMap.get(serviceId).clear();
             serviceMetersMap.remove(serviceId);
             log.info("Remove gauge metrics for the service {} complete", serviceId);

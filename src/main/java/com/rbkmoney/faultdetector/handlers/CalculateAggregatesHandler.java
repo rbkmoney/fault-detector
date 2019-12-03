@@ -84,6 +84,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
         serviceAggregates.setErrorOperationsCount(lastPreAggregates.getErrorOperationsCount());
         serviceAggregates.setSuccessOperationsCount(lastPreAggregates.getSuccessOperationsCount());
         serviceAggregates.setOvertimeOperationsCount(lastPreAggregates.getOvertimeOperationsCount());
+        serviceAggregates.setOperationsAvgTime((long) lastPreAggregates.getCompleteOperationsAvgTime());
 
         log.info("Last aggregates for service id '{}' by aggregation time {}: {}", serviceId,
                 aggregationTime, serviceAggregates);
