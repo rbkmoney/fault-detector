@@ -79,9 +79,9 @@ public class ServiceOperations {
         long currentTimeMillis = System.currentTimeMillis();
         Map<String, ServiceOperation> serviceEventMap = getServiceOperationsMap(serviceId);
         if (serviceEventMap == null) {
-            log.info("Impossible to clean. Service operation map not found");
+            log.debug("Impossible to clean. Service operation map not found");
         } else {
-            log.info("Start cleaning unusual operations. Total operations for service {}: {}",
+            log.debug("Start cleaning unused operations. Total operations for service {}: {}",
                     serviceId, serviceEventMap.size());
             int count = 0;
             for (ServiceOperation event : serviceEventMap.values()) {
@@ -90,7 +90,7 @@ public class ServiceOperations {
                     count++;
                 }
             }
-            log.info("Removed {} operations from map for service id {}", count, serviceId);
+            log.debug("Removed {} operations from map for service id {}", count, serviceId);
         }
 
     }

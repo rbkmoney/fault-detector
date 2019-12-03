@@ -20,6 +20,8 @@ public final class GaugeMetricsUtils {
 
     public static final String OVERTIME_OPER_COUNT_GAUGE_NAME = GAUGE_PREFEX + "overtime.count_";
 
+    public static final String OPERS_AVG_TIME_GAUGE_NAME = GAUGE_PREFEX + "operations.avg_";
+
     public static final String CONFIG_SLIDING_WINDOW_GAUGE_NAME = GAUGE_PREFEX + "config.slidingWindow_";
 
     public static final String CONFIG_OPERATION_TIME_LIMIT_GAUGE_NAME = GAUGE_PREFEX + "config.operationTimeLimit_";

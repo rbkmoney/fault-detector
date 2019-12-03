@@ -38,6 +38,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
         meterIds.add(registerConfigSlidingWindow(registry));
         meterIds.add(registerConfigOperationTimeLimit(registry));
         meterIds.add(registerConfigPreAggregationSize(registry));
+        meterIds.add(registerCompleteOpersAvgTimeMetrics(registry));
         serviceMetersMap.put(serviceId, meterIds);
         List<String> metersList = registry.getMeters().stream()
                 .map(meter -> meter.getId() == null ? "Empty" : meter.getId().getName())
@@ -131,6 +132,21 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
 
         log.info(GAUGE_LOG_PATTERN, OVERTIME_OPER_COUNT_GAUGE_NAME + serviceId);
         return registerOvertimeOperCount;
+    }
+
+    private Gauge registerCompleteOpersAvgTimeMetrics(MeterRegistry registry) {
+        Gauge registerCompleteOpersAvgTimeMetrics =
+                Gauge.builder(OPERS_AVG_TIME_GAUGE_NAME + replacePrefix(serviceId),
+                        aggregatesMap,
+                        map -> map.get(serviceId) == null ? null : map.get(serviceId).getOperationsAvgTime())
+                .tags(emptyList())
+                .description("The value of avg operations time for the service " + serviceId)
+                .baseUnit(TIME_UNIT)
+                .strongReference(false)
+                .register(registry);
+
+        log.info(GAUGE_LOG_PATTERN, OPERS_AVG_TIME_GAUGE_NAME + serviceId);
+        return registerCompleteOpersAvgTimeMetrics;
     }
 
     private Gauge registerConfigSlidingWindow(MeterRegistry registry) {

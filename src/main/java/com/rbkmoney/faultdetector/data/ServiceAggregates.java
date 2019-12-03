@@ -21,4 +21,6 @@ public class ServiceAggregates {
 
     private long overtimeOperationsCount;
 
+    private long operationsAvgTime;
+
 }

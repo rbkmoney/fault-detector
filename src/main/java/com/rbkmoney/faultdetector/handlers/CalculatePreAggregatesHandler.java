@@ -55,7 +55,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
         if (useServiceConfigPreAggregationPeriod) {
             preparePreAggregatesWithDynamicWindowSize(serviceId, preAggregates, settings);
         } else {
-            log.info("New pre-aggregates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
+            log.debug("Pre-aggregates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
             servicePreAggregates.addPreAggregates(serviceId, preAggregates);
         }
 
@@ -80,7 +80,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
             if (preAggregatesDeque != null) {
                 preAggregatesDeque.getFirst().clearTempData();
             }
-            log.info("New pre-aggregates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
+            log.debug("Pre-aggregates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
             servicePreAggregates.addPreAggregates(serviceId, preAggregates);
         }
     }
@@ -102,6 +102,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
                 // Добавляем в список выполняющихся
                 preAggregates.addSuccessOperation();
             }
+            preAggregates.addCompleteOperationTime(operExecTime);
             return serviceOperation.getOperationId();
         } else {
             long operExecTime = currentTimeMillis - serviceOperation.getStartTime();
