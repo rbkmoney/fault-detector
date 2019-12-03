@@ -62,7 +62,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
 
         ServiceSettings settings = serviceSettingsMap.get(serviceId);
         servicePreAggregates.cleanPreAggregares(serviceId, settings);
-        clearUnusualAggregates();
+        clearUnusedAggregates();
         log.info("Processing the service statistics for service '{}' was finished", serviceId);
     }
 
@@ -90,7 +90,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
         return serviceAggregates;
     }
 
-    private void clearUnusualAggregates() {
+    private void clearUnusedAggregates() {
         for (String serviceId : serviceAggregatesMap.keySet()) {
             ServiceSettings serviceSettings = serviceSettingsMap.get(serviceId);
             ServiceAggregates serviceAggregates = serviceAggregatesMap.get(serviceId);
