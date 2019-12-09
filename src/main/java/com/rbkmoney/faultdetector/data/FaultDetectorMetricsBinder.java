@@ -31,8 +31,8 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
     @Override
     public void bindTo(MeterRegistry registry) {
         List<Gauge> meterIds = new ArrayList<>();
-        registerFailureRateMetrics(registry);
-        registerOperCountMetrics(registry);
+        meterIds.add(registerFailureRateMetrics(registry));
+        meterIds.add(registerOperCountMetrics(registry));
         meterIds.add(registerSuccessOperCountMetrics(registry));
         meterIds.add(registerRunningOperCountMetrics(registry));
         meterIds.add(registerErrorOperCountMetrics(registry));
