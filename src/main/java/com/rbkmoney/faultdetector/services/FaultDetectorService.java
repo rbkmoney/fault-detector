@@ -34,6 +34,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
     public void initService(String serviceId, ServiceConfig serviceConfig) throws TException {
         setServiceSettings(serviceId, serviceConfig);
         serviceOperations.initService(serviceId);
+        metrics.addAggregatesMetrics(serviceId);
         log.info("Service {} have been initialized", serviceId);
     }
 
@@ -48,7 +49,6 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
         if (!serviceConfigMap.containsKey(serviceId) || !serviceOperations.containsService(serviceId)) {
             log.warn("Service {} is not initialized. It will be re-initialized", serviceId);
             initService(serviceId, serviceConfig);
-            metrics.addAggregatesMetrics(serviceId);
         }
         if (isEmptyOperation(operation)) {
             log.error("Received empty operation for service '{}'", serviceId);
