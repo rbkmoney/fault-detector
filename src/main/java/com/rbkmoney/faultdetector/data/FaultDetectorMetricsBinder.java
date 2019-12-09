@@ -1,7 +1,9 @@
 package com.rbkmoney.faultdetector.data;
 
 import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.ImmutableTag;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,24 +22,21 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
 
     private final Map<String, ServiceAggregates> aggregatesMap;
 
-    private final Map<String, ServiceSettings> serviceConfigMap;
-
     private final Map<String, List<Gauge>> serviceMetersMap;
 
     private final String serviceId;
 
+    private final static List<Tag> TAGS = getTags();
+
     @Override
     public void bindTo(MeterRegistry registry) {
         List<Gauge> meterIds = new ArrayList<>();
-        meterIds.add(registerFailureRateMetrics(registry));
-        meterIds.add(registerOperCountMetrics(registry));
+        registerFailureRateMetrics(registry);
+        registerOperCountMetrics(registry);
         meterIds.add(registerSuccessOperCountMetrics(registry));
         meterIds.add(registerRunningOperCountMetrics(registry));
         meterIds.add(registerErrorOperCountMetrics(registry));
         meterIds.add(registerOvertimeOperCountMetrics(registry));
-        meterIds.add(registerConfigSlidingWindow(registry));
-        meterIds.add(registerConfigOperationTimeLimit(registry));
-        meterIds.add(registerConfigPreAggregationSize(registry));
         meterIds.add(registerCompleteOpersAvgTimeMetrics(registry));
         serviceMetersMap.put(serviceId, meterIds);
         List<String> metersList = registry.getMeters().stream()
@@ -53,7 +52,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                         map -> map.get(serviceId) == null ? null : map.get(serviceId).getFailureRate())
                 .description("The value of the availability metric for the service " + serviceId)
                 .baseUnit(BASE_UNIT)
-                .strongReference(true)
+                .tags(TAGS)
                 .register(registry);
 
         log.info(GAUGE_LOG_PATTERN, FAILURE_GAUGE_NAME + serviceId);
@@ -67,6 +66,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                         map -> map.get(serviceId) == null ? null : map.get(serviceId).getOperationsCount())
                 .description("The value of operations count for the service " + serviceId)
                 .baseUnit(BASE_UNIT)
+                .tags(TAGS)
                 .strongReference(true)
                 .register(registry);
 
@@ -82,6 +82,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                 .tags(emptyList())
                 .description("The value of success operations count for the service " + serviceId)
                 .baseUnit(BASE_UNIT)
+                .tags(TAGS)
                 .strongReference(true)
                 .register(registry);
 
@@ -97,6 +98,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                 .tags(emptyList())
                 .description("The value of running operations count for the service " + serviceId)
                 .baseUnit(BASE_UNIT)
+                .tags(TAGS)
                 .strongReference(true)
                 .register(registry);
 
@@ -112,6 +114,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                 .tags(emptyList())
                 .description("The value of error operations count for the service " + serviceId)
                 .baseUnit(BASE_UNIT)
+                .tags(TAGS)
                 .strongReference(true)
                 .register(registry);
 
@@ -127,6 +130,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                 .tags(emptyList())
                 .description("The value of overtime operations count for the service " + serviceId)
                 .baseUnit(BASE_UNIT)
+                .tags(TAGS)
                 .strongReference(true)
                 .register(registry);
 
@@ -142,60 +146,22 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                 .tags(emptyList())
                 .description("The value of avg operations time for the service " + serviceId)
                 .baseUnit(TIME_UNIT)
-                .strongReference(false)
+                .tags(TAGS)
+                .strongReference(true)
                 .register(registry);
 
         log.info(GAUGE_LOG_PATTERN, OPERS_AVG_TIME_GAUGE_NAME + serviceId);
         return registerCompleteOpersAvgTimeMetrics;
     }
 
-    private Gauge registerConfigSlidingWindow(MeterRegistry registry) {
-        Gauge registerConfigSlidingWindowSize =
-                Gauge.builder(CONFIG_SLIDING_WINDOW_GAUGE_NAME + replacePrefix(serviceId),
-                              serviceConfigMap,
-                              map -> map.get(serviceId) == null ? null : map.get(serviceId).getSlidingWindow())
-                        .tags(emptyList())
-                        .description("The value of sliding window for the service " + serviceId)
-                        .baseUnit(TIME_UNIT)
-                        .strongReference(false)
-                        .register(registry);
-
-        log.info(GAUGE_LOG_PATTERN, CONFIG_SLIDING_WINDOW_GAUGE_NAME + serviceId);
-        return registerConfigSlidingWindowSize;
-    }
-
-    private Gauge registerConfigOperationTimeLimit(MeterRegistry registry) {
-        Gauge registerConfigOperationTimeLimitSize =
-                Gauge.builder(CONFIG_OPERATION_TIME_LIMIT_GAUGE_NAME + replacePrefix(serviceId),
-                              serviceConfigMap,
-                              map -> map.get(serviceId) == null ? null : map.get(serviceId).getOperationTimeLimit())
-                        .tags(emptyList())
-                        .description("The size of operation time limit for the service " + serviceId)
-                        .baseUnit(TIME_UNIT)
-                        .strongReference(false)
-                        .register(registry);
-
-        log.info(GAUGE_LOG_PATTERN, CONFIG_OPERATION_TIME_LIMIT_GAUGE_NAME + serviceId);
-        return registerConfigOperationTimeLimitSize;
-    }
-
-    private Gauge registerConfigPreAggregationSize(MeterRegistry registry) {
-        Gauge registerConfigPreAggregationSize =
-                Gauge.builder(CONFIG_PRE_AGGREGATION_SIZE_GAUGE_NAME + replacePrefix(serviceId),
-                              serviceConfigMap,
-                              map -> map.get(serviceId) == null ? null : map.get(serviceId).getPreAggregationSize())
-                        .tags(emptyList())
-                        .description("The value of pre-aggregation size for the service " + serviceId)
-                        .baseUnit(TIME_UNIT)
-                        .strongReference(false)
-                        .register(registry);
-
-        log.info(GAUGE_LOG_PATTERN, CONFIG_PRE_AGGREGATION_SIZE_GAUGE_NAME + serviceId);
-        return registerConfigPreAggregationSize;
-    }
-
     private static String replacePrefix(String serviceId) {
         return serviceId.replace(OLD_SERVICE_PREFIX, NEW_SERVICE_PREFIX);
+    }
+
+    private static List<Tag> getTags() {
+        List<Tag> tags = new ArrayList<>();
+        tags.add(new ImmutableTag("application", "fault-detector"));
+        return tags;
     }
 
 }

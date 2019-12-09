@@ -62,7 +62,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
 
         ServiceSettings settings = serviceSettingsMap.get(serviceId);
         servicePreAggregates.cleanPreAggregares(serviceId, settings);
-        clearUnusedAggregates();
+        //clearUnusedAggregates();
         log.info("Processing the service statistics for service '{}' was finished", serviceId);
     }
 
