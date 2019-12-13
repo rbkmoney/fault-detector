@@ -32,33 +32,32 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
     @Override
     public void handle(String serviceId) {
         ServiceSettings settings = serviceSettingsMap.get(serviceId);
-
-        Map<String, ServiceOperation> serviceOperationMap = serviceOperations.getServiceOperationsMap(serviceId);
-        if (serviceOperationMap == null || serviceOperationMap.isEmpty()) {
-            //TODO: возможно имеет смысл пустые "тики" добивать
-            log.info("The list of operations for the service {} is empty", serviceId);
-            return;
-        }
-
         Long currentTimeMillis = System.currentTimeMillis();
 
         PreAggregates preAggregates = new PreAggregates();
         preAggregates.setAggregationTime(currentTimeMillis);
         preAggregates.setServiceId(serviceId);
-        preAggregates.addOperations(serviceOperationMap.keySet());
 
-        for (ServiceOperation serviceOperation : serviceOperationMap.values()) {
-            String operationId = prepareOperation(serviceOperation, preAggregates, settings, currentTimeMillis);
-            serviceOperationMap.remove(operationId);
-        }
-
-        if (useServiceConfigPreAggregationPeriod) {
-            preparePreAggregatesWithDynamicWindowSize(serviceId, preAggregates, settings);
-        } else {
-            log.debug("Pre-aggregates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
+        Map<String, ServiceOperation> serviceOperationMap = serviceOperations.getServiceOperationsMap(serviceId);
+        if (serviceOperationMap == null || serviceOperationMap.isEmpty()) {
+            log.info("The list of operations for the service {} is empty", serviceId);
+            preAggregates.addOperations(new HashSet<>());
             servicePreAggregates.addPreAggregates(serviceId, preAggregates);
-        }
+        } else {
+            preAggregates.addOperations(serviceOperationMap.keySet());
 
+            for (ServiceOperation serviceOperation : serviceOperationMap.values()) {
+                String operationId = prepareOperation(serviceOperation, preAggregates, settings, currentTimeMillis);
+                serviceOperationMap.remove(operationId);
+            }
+
+            if (useServiceConfigPreAggregationPeriod) {
+                preparePreAggregatesWithDynamicWindowSize(serviceId, preAggregates, settings);
+            } else {
+                log.debug("Pre-aggregates for service '{}' : {}. Current settings: {}", serviceId, preAggregates, settings);
+                servicePreAggregates.addPreAggregates(serviceId, preAggregates);
+            }
+        }
         calculateAggregatesHandler.handle(serviceId);
     }
 

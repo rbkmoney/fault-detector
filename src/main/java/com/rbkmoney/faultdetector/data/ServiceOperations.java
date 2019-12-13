@@ -81,8 +81,8 @@ public class ServiceOperations {
         if (serviceEventMap == null) {
             log.debug("Impossible to clean. Service operation map not found");
         } else {
-            log.debug("Start cleaning unused operations. Total operations for service {}: {}",
-                    serviceId, serviceEventMap.size());
+            log.debug("Start cleaning unused operations. Total operations for service {}: {} (settings - {})",
+                    serviceId, serviceEventMap.size(), settings);
             int count = 0;
             for (ServiceOperation event : serviceEventMap.values()) {
                 if (currentTimeMillis - event.getStartTime() > settings.getSlidingWindow()) {
@@ -90,7 +90,7 @@ public class ServiceOperations {
                     count++;
                 }
             }
-            log.debug("Removed {} operations from map for service id {}", count, serviceId);
+            log.debug("Removed {} operations from map for service id {} (settings - {})", count, serviceId, settings);
         }
 
     }
