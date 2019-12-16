@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 @Component
@@ -79,12 +80,12 @@ public class CalculateAggregatesHandler implements Handler<String> {
                 .max(Comparator.comparingLong(PreAggregates::getAggregationTime))
                 .orElse(new PreAggregates());
 
-        serviceAggregates.setOperationsCount(lastPreAggregates.getOperationsCount());
-        serviceAggregates.setRunningOperationsCount(lastPreAggregates.getRunningOperationsCount());
-        serviceAggregates.setErrorOperationsCount(lastPreAggregates.getErrorOperationsCount());
-        serviceAggregates.setSuccessOperationsCount(lastPreAggregates.getSuccessOperationsCount());
-        serviceAggregates.setOvertimeOperationsCount(lastPreAggregates.getOvertimeOperationsCount());
-        serviceAggregates.setOperationsAvgTime((long) lastPreAggregates.getCompleteOperationsAvgTime());
+        serviceAggregates.setOperationsCount(new AtomicLong(lastPreAggregates.getOperationsCount()));
+        serviceAggregates.setRunningOperationsCount(new AtomicLong(lastPreAggregates.getRunningOperationsCount()));
+        serviceAggregates.setErrorOperationsCount(new AtomicLong(lastPreAggregates.getErrorOperationsCount()));
+        serviceAggregates.setSuccessOperationsCount(new AtomicLong(lastPreAggregates.getSuccessOperationsCount()));
+        serviceAggregates.setOvertimeOperationsCount(new AtomicLong(lastPreAggregates.getOvertimeOperationsCount()));
+        serviceAggregates.setOperationsAvgTime(new AtomicLong((long) lastPreAggregates.getCompleteOperationsAvgTime()));
 
         log.info("Last aggregates for service id '{}' by aggregation time {}: {}", serviceId,
                 aggregationTime, serviceAggregates);
@@ -101,7 +102,6 @@ public class CalculateAggregatesHandler implements Handler<String> {
                     serviceAggregatesMap.remove(serviceId);
                 }
             }
-
         }
     }
 

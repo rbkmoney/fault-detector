@@ -12,6 +12,8 @@ operations:
   preAggregationPeriod: 3000
   useServiceConfigPreAggregationPeriod: false
   schedulerPoolSize: 2
+  metricsCheckPeriod: 5000
+  metricsInitialDelayPeriod: 5000
 
 kafka:
   bootstrap:
