@@ -2,6 +2,8 @@ package com.rbkmoney.faultdetector.data;
 
 import lombok.Data;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 @Data
 public class ServiceAggregates {
 
@@ -11,16 +13,16 @@ public class ServiceAggregates {
 
     private double failureRate;
 
-    private long operationsCount;
+    private AtomicLong operationsCount;
 
-    private long runningOperationsCount;
+    private AtomicLong runningOperationsCount;
 
-    private long successOperationsCount;
+    private AtomicLong successOperationsCount;
 
-    private long errorOperationsCount;
+    private AtomicLong errorOperationsCount;
 
-    private long overtimeOperationsCount;
+    private AtomicLong overtimeOperationsCount;
 
-    private long operationsAvgTime;
+    private AtomicLong operationsAvgTime;
 
 }

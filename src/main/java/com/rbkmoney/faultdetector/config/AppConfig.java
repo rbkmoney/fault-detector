@@ -17,35 +17,27 @@ import java.util.concurrent.ConcurrentHashMap;
 @Configuration
 public class AppConfig {
 
-    private final Map<String, ServiceAggregates> aggregatesMap = new ConcurrentHashMap<>();
-
-    private final Map<String, ServiceSettings> serviceSettingsMap = new ConcurrentHashMap<>();
-
-    private final ServicePreAggregates servicePreAggregates = new ServicePreAggregates();
-
-    private final ServiceOperations serviceOperations = new ServiceOperations();
-
     @Value("${operations.schedulerPoolSize}")
     private int schedulerPoolSize;
 
     @Bean
     public Map<String, ServiceAggregates> aggregatesMap() {
-        return aggregatesMap;
+        return new ConcurrentHashMap<>();
     }
 
     @Bean
     public Map<String, ServiceSettings> serviceConfigMap() {
-        return serviceSettingsMap;
+        return new ConcurrentHashMap<>();
     }
 
     @Bean
     public ServicePreAggregates servicePreAggregates() {
-        return servicePreAggregates;
+        return new ServicePreAggregates();
     }
 
     @Bean
     public ServiceOperations serviceOperations() {
-        return serviceOperations;
+        return new ServiceOperations();
     }
 
     @Bean
