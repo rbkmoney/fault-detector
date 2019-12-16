@@ -9,9 +9,9 @@ import org.apache.thrift.TException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.rbkmoney.faultdetector.utils.SettingsMappingUtils.getServiceSettings;
 
@@ -28,13 +28,10 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
 
     private final ServiceOperations serviceOperations;
 
-    private final FaultDetectorMetrics metrics;
-
     @Override
     public void initService(String serviceId, ServiceConfig serviceConfig) throws TException {
         setServiceSettings(serviceId, serviceConfig);
         serviceOperations.initService(serviceId);
-        metrics.addAggregatesMetrics(serviceId);
         log.info("Service {} have been initialized", serviceId);
     }
 
@@ -89,7 +86,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
     @Override
     public List<ServiceStatistics> getStatistics(List<String> services) throws TException {
         log.info("Check statistics for the services {}", services);
-        List<ServiceStatistics> serviceStatisticsList = new ArrayList<>();
+        List<ServiceStatistics> serviceStatisticsList = new CopyOnWriteArrayList<>();
 
         try {
             for (String serviceId : services) {
@@ -99,9 +96,9 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
                     ServiceStatistics stat = new ServiceStatistics();
                     stat.setServiceId(aggregates.getServiceId());
                     stat.setFailureRate(aggregates.getFailureRate());
-                    stat.setOperationsCount(aggregates.getOperationsCount());
-                    stat.setErrorOperationsCount(aggregates.getErrorOperationsCount());
-                    stat.setSuccessOperationsCount(aggregates.getSuccessOperationsCount());
+                    stat.setOperationsCount(aggregates.getOperationsCount().longValue());
+                    stat.setErrorOperationsCount(aggregates.getErrorOperationsCount().longValue());
+                    stat.setSuccessOperationsCount(aggregates.getSuccessOperationsCount().longValue());
                     serviceStatisticsList.add(stat);
                 }
             }

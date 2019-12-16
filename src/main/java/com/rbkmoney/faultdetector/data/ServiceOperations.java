@@ -92,7 +92,6 @@ public class ServiceOperations {
             }
             log.debug("Removed {} operations from map for service id {} (settings - {})", count, serviceId, settings);
         }
-
     }
 
 }
