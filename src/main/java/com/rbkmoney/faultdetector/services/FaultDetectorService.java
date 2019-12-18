@@ -85,7 +85,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
 
     @Override
     public List<ServiceStatistics> getStatistics(List<String> services) throws TException {
-        log.info("Check statistics for the services {}", services);
+        log.info("Check statistics for the services: {}", services);
         List<ServiceStatistics> serviceStatisticsList = new CopyOnWriteArrayList<>();
 
         try {
@@ -106,7 +106,7 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
             log.error("Received error during processing of statistics", ex);
         }
 
-        log.info("Statistic for services: {}", serviceStatisticsList);
+        log.info("Statistics for the services: {}", serviceStatisticsList);
         return serviceStatisticsList;
     }
 

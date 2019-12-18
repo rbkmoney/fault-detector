@@ -32,6 +32,9 @@ public class CalculateAggregatesHandler implements Handler<String> {
         int weight = preAggregatesDeque.size();
         double failureRateSum = 0;
         long weightSum = 0;
+        long totalErrorOpersCount = 0;
+        long totalSuccessOpersCount = 0;
+        long totalSumOpersCount = 0;
         long aggregationTime = System.currentTimeMillis();
         log.info("Count of pre-aggregates for service '{}': {}. Time label: {}", serviceId,
                 preAggregatesDeque.size(), aggregationTime);
@@ -45,6 +48,10 @@ public class CalculateAggregatesHandler implements Handler<String> {
                     0 : ((double) failureOperationsCount / totalOperationsCount) * weight;
             failureRateSum += failureRate;
             weightSum += weight;
+            totalErrorOpersCount += errorOperationsCount;
+            totalSuccessOpersCount += preAggregates.getSuccessOperationsCount();
+            totalSumOpersCount += totalOperationsCount;
+
             log.debug("Step pre-aggregation {} for the service '{}'. Params: overtimeOperationsCount - {}, " +
                             "errorOperationsCount - {}, operationsCount - {}, failureRate - {}, failureRateSum - {}, " +
                             "weightSum - {}. Time label: {} ", weight, serviceId, overtimeOperationsCount,
@@ -54,8 +61,11 @@ public class CalculateAggregatesHandler implements Handler<String> {
         }
 
         double failureRate = weightSum == 0 ? 0 : failureRateSum / weightSum;
-        log.info("Failure rate for service {} with time label {} = {} (failure rate sum = {}, weight sum = {})",
-                serviceId, aggregationTime, failureRate, failureRateSum, weightSum);
+        log.info("Failure rate for service {} with time label {} = {} (failure rate sum = {}, weight sum = {}, " +
+                        "total operations count for sliding window {}, total success operations count for sliding window {}, " +
+                        "total error operations count for sliding window {})",
+                serviceId, aggregationTime, failureRate, failureRateSum, weightSum, totalSumOpersCount,
+                totalSuccessOpersCount, totalErrorOpersCount);
 
         ServiceAggregates serviceAggregates =
                 getServiceAggregates(serviceId, failureRate, preAggregatesDeque, aggregationTime);
@@ -87,8 +97,8 @@ public class CalculateAggregatesHandler implements Handler<String> {
         serviceAggregates.setOvertimeOperationsCount(new AtomicLong(lastPreAggregates.getOvertimeOperationsCount()));
         serviceAggregates.setOperationsAvgTime(new AtomicLong((long) lastPreAggregates.getCompleteOperationsAvgTime()));
 
-        log.info("Last aggregates for service id '{}' by aggregation time {}: {}", serviceId,
-                aggregationTime, serviceAggregates);
+        log.info("Last aggregates for service id '{}' by aggregation time {}: {} (activity statistics for last " +
+                        "pre-aggregates)", serviceId, aggregationTime, serviceAggregates);
         return serviceAggregates;
     }
 
