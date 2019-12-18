@@ -98,7 +98,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
                 // Так как операция уже завершилась она удаляется из списка
                 preAggregates.addOvertimeOperation(serviceOperation.getOperationId());
             } else {
-                // Добавляем в список выполняющихся
+                // Добавляем в список успешных операций 
                 preAggregates.addSuccessOperation();
             }
             preAggregates.addCompleteOperationTime(operExecTime);

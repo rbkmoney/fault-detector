@@ -21,7 +21,8 @@ public class ServicePreAggregates {
         }
         preAggregatesSet.addFirst(preAggregates);
         servicePreAggregatesMap.put(serviceId, preAggregatesSet);
-        log.info("New pre-aggregates '{}' for service '{}' were added", preAggregates, serviceId);
+        log.info("New pre-aggregates '{}' for service '{}' were added. Count of pre-aggregates: {} ",
+                preAggregates, serviceId, servicePreAggregatesMap.get(serviceId).size());
     }
 
     public void cleanPreAggregares(String serviceId, ServiceSettings settings) {
