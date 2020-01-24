@@ -47,3 +47,4 @@ management:
     export:
       statsd:
         flavor: etsy
+        enabled: false
