@@ -7,7 +7,6 @@ import io.micrometer.statsd.StatsdMeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,7 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Slf4j
-@Lazy
 @Component
 @RequiredArgsConstructor
 @ConditionalOnProperty(value = "management.metrics.export.statsd.enabled", havingValue = "true")
