@@ -2,7 +2,7 @@ server:
   port: @server.port@
 spring:
   application:
-    name: @project.name@
+    name: FD
 
 info:
   version: @project.version@

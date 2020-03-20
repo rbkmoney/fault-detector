@@ -18,6 +18,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 
 import java.io.File;
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -143,7 +144,28 @@ public class KafkaConfig {
         factory.setBatchListener(false);
         factory.setConcurrency(concurrency);
 
+        sss();
+
         return factory;
+    }
+
+    private void sss() {
+        Runtime runtime = Runtime.getRuntime();
+
+        final NumberFormat format = NumberFormat.getInstance();
+
+        long maxMemory = runtime.maxMemory();
+        long allocatedMemory = runtime.totalMemory();
+        long freeMemory = runtime.freeMemory();
+        long mb = 1024 * 1024;
+        final String mega = " MB";
+
+        log.info("========================== Memory Info - 2 ========================");
+        log.info("Free memory: " + format.format(freeMemory / mb) + mega);
+        log.info("Allocated memory: " + format.format(allocatedMemory / mb) + mega);
+        log.info("Max memory: " + format.format(maxMemory / mb) + mega);
+        log.info("Total free memory: " + format.format((freeMemory + (maxMemory - allocatedMemory)) / mb) + mega);
+        log.info("=================================================================\n");
     }
 
 }
