@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>fault-detector</artifactId>
-    <version>1.3.55-SNAPSHOT</version>
+    <version>1.3.56-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>fault-detector</name>
@@ -129,6 +129,7 @@
                 <targetPath>${project.build.directory}</targetPath>
                 <includes>
                     <include>Dockerfile</include>
+                    <include>jemalloc.rpm</include>
                 </includes>
                 <filtering>true</filtering>
             </resource>
@@ -182,6 +183,7 @@
                 <configuration>
                     <environmentVariables>
                         <MALLOC_ARENA_MAX>0</MALLOC_ARENA_MAX>
+                        <MALLOC_PER_THREAD>0</MALLOC_PER_THREAD>
                     </environmentVariables>
                 </configuration>
             </plugin>

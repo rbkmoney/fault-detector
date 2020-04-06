@@ -31,6 +31,7 @@ public class FaultDetectorApplication extends SpringApplication {
         log.info("Max memory: " + format.format(maxMemory / mb) + mega);
         log.info("Total free memory: " + format.format((freeMemory + (maxMemory - allocatedMemory)) / mb) + mega);
         log.info("=================================================================\n");
+        log.error("*** Open JDK 14 ***");
         SpringApplication.run(FaultDetectorApplication.class, args);
     }
 

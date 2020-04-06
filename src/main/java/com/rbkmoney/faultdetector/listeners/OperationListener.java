@@ -40,7 +40,10 @@ public class OperationListener {
             serviceIds.forEach(serviceId ->
                     serviceOperations.cleanUnusualOperations(serviceId, serviceSettingsMap.get(serviceId)));
         } catch (Exception ex) {
-            log.error("Error received while processing data from kafka", ex);
+            log.error("Exception received while processing data from kafka", ex);
+            throw ex;
+        } catch (Throwable ex) {
+            log.error("Throwable received while processing data from kafka", ex);
         }
         log.debug("{} operations from kafka were obtained", serviceOperationsList.size());
     }

@@ -43,20 +43,24 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
     @Override
     public void registerOperation(String serviceId, Operation operation, ServiceConfig serviceConfig)
             throws ServiceNotFoundException, TException {
-        if (!serviceConfigMap.containsKey(serviceId) || !serviceOperations.containsService(serviceId)) {
-            log.warn("Service {} is not initialized. It will be re-initialized", serviceId);
-            initService(serviceId, serviceConfig);
-        }
-        if (isEmptyOperation(operation)) {
-            log.error("Received empty operation for service '{}'", serviceId);
-        } else {
-            try {
-                setServiceSettings(serviceId, serviceConfig);
-                sendOperationHandler.handle(transformOperation(serviceId, operation));
-                log.info("Registration operation '{}' for service '{}' finished", operation, serviceId);
-            } catch (Exception e) {
-                log.error("Error while registration operation", e);
+        try {
+            if (!serviceConfigMap.containsKey(serviceId) || !serviceOperations.containsService(serviceId)) {
+                log.warn("Service {} is not initialized. It will be re-initialized", serviceId);
+                initService(serviceId, serviceConfig);
             }
+            if (isEmptyOperation(operation)) {
+                log.error("Received empty operation for service '{}'", serviceId);
+            } else {
+                try {
+                    setServiceSettings(serviceId, serviceConfig);
+                    sendOperationHandler.handle(transformOperation(serviceId, operation));
+                    log.info("Registration operation '{}' for service '{}' finished", operation, serviceId);
+                } catch (Exception e) {
+                    log.error("Error while registration operation", e);
+                }
+            }
+        } catch (Throwable th) {
+            log.error("Throwable received while processing data from kafka", th);
         }
     }
 
@@ -104,6 +108,8 @@ public class FaultDetectorService implements FaultDetectorSrv.Iface {
             }
         } catch (Exception ex) {
             log.error("Received error during processing of statistics", ex);
+        } catch (Throwable th) {
+            log.error("Throwable received while processing data from kafka", th);
         }
 
         log.info("Statistics for the services: {}", serviceStatisticsList);
