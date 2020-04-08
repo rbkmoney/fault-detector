@@ -5,12 +5,14 @@ import com.rbkmoney.faultdetector.data.ServiceOperation;
 import com.rbkmoney.faultdetector.data.ServiceOperations;
 import com.rbkmoney.faultdetector.handlers.Handler;
 import com.rbkmoney.faultdetector.services.FaultDetectorService;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import static org.junit.Assert.assertEquals;
 
+@Ignore
 public class KafkaIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
