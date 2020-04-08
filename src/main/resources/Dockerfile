@@ -7,7 +7,7 @@ ENV MALLOC_ARENA_MAX 2
 RUN apt-get update && \
     apt-get install libjemalloc2 && \
     echo "/usr/lib/x86_64-linux-gnu/libjemalloc.so.2" > /etc/ld.so.preload && \
-    apt-get clean &&
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 COPY @artifactId@-@version@.jar /opt/@artifactId@/@artifactId@.jar
