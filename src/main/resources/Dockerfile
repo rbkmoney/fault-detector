@@ -1,27 +1,28 @@
 # @dockerfile.Template@
-FROM adoptopenjdk/openjdk14
+FROM openjdk:14-slim
 MAINTAINER @project.maintainer@
 
 ENV MALLOC_ARENA_MAX 2
 
-RUN set -ex && \
-    apt-get update && \
-    apt-get install libjemalloc1 && \
-    echo "/usr/lib/x86_64-linux-gnu/libjemalloc.so.1" > /etc/ld.so.preload && \
+RUN apt-get update && \
+    apt-get install libjemalloc2 && \
+    echo "/usr/lib/x86_64-linux-gnu/libjemalloc.so.2" > /etc/ld.so.preload && \
+    apt-get clean &&
     rm -rf /var/lib/apt/lists/*
 
-COPY fault-detector-1.3.56-SNAPSHOT.jar /opt/fault-detector/fault-detector.jar
+COPY @artifactId@-@version@.jar /opt/@artifactId@/@artifactId@.jar
 
 CMD [ "java", "-XX:+PrintFlagsFinal", \
+              "-XX:-TieredCompilation", \
               "-XX:OnOutOfMemoryError=kill %p", \
               "-XX:+HeapDumpOnOutOfMemoryError", \
-              "-jar", "/opt/fault-detector/fault-detector.jar" ]
+              "-jar", "/opt/@artifactId@/@artifactId@.jar" ]
 
-EXPOSE 8022
+EXPOSE @exposed.ports@
 
-LABEL com.rbkmoney.fault-detector.parent=service-java \
-    com.rbkmoney.fault-detector.parent_tag=bc95d0d6dc13c693acd2b274531a7d604b877bf3 \
-    com.rbkmoney.fault-detector.commit_id=030116dd64e1e5ac48c0c6be211aeca6cf7f0bc6 \
-    com.rbkmoney.fault-detector.branch=epic/java13
+LABEL com.rbkmoney.@artifactId@.parent=service-java \
+    com.rbkmoney.@artifactId@.parent_tag=openjdk-14-slim \
+    com.rbkmoney.@artifactId@.commit_id=@git.commit.id@ \
+    com.rbkmoney.@artifactId@.branch=@git.branch@
 
-WORKDIR /opt/fault-detector
+WORKDIR /opt/@artifactId@

@@ -6,6 +6,7 @@ import com.rbkmoney.faultdetector.handlers.Handler;
 import com.rbkmoney.faultdetector.services.FaultDetectorService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,6 +20,7 @@ import static com.rbkmoney.faultdetector.data.FaultDetectorData.getStartOperatio
 import static org.junit.Assert.assertEquals;
 
 @Slf4j
+@Ignore
 public class FaultDetectorIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
