@@ -25,6 +25,8 @@ import java.util.Map;
 @Configuration
 public class KafkaConfig {
 
+    private static final String EARLIEST = "earliest";
+
     @Value("${kafka.bootstrap.servers}")
     private String servers;
 
@@ -105,7 +107,7 @@ public class KafkaConfig {
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ServiceOperationDeserializer.class);
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, EARLIEST);
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPoolRecords);
         props.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, fetchMinBytes);
         props.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, fetchMaxWaitMs);
