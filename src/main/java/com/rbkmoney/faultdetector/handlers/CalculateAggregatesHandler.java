@@ -74,7 +74,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
         ServiceSettings settings = serviceSettingsMap.get(serviceId);
         servicePreAggregates.cleanPreAggregares(serviceId, settings);
         //clearUnusedAggregates();
-        log.info("Processing the service statistics for service '{}' was finished", serviceId);
+        log.debug("Processing the service statistics for service '{}' was finished", serviceId);
     }
 
     private ServiceAggregates getServiceAggregates(String serviceId,
@@ -97,7 +97,7 @@ public class CalculateAggregatesHandler implements Handler<String> {
         serviceAggregates.setOvertimeOperationsCount(new AtomicLong(lastPreAggregates.getOvertimeOperationsCount()));
         serviceAggregates.setOperationsAvgTime(new AtomicLong((long) lastPreAggregates.getCompleteOperationsAvgTime()));
 
-        log.info("Last aggregates for service id '{}' by aggregation time {}: {} (activity statistics for last " +
+        log.debug("Last aggregates for service id '{}' by aggregation time {}: {} (activity statistics for last " +
                         "pre-aggregates)", serviceId, aggregationTime, serviceAggregates);
         return serviceAggregates;
     }
