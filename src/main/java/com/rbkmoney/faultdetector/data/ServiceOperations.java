@@ -23,7 +23,7 @@ public class ServiceOperations {
     public void addOperation(String serviceId, String operationId, ServiceOperation serviceOperation) {
         Map<String, ServiceOperation> operationsMap = serviceMap.get(serviceId);
         if (operationsMap == null) {
-            log.error("OperationsMap for service '{}' not found. Service should be re-initialized", serviceId);
+            log.warn("OperationsMap for service '{}' not found. Service should be re-initialized", serviceId);
             return;
         }
 
@@ -73,7 +73,7 @@ public class ServiceOperations {
 
     public void cleanUnusualOperations(String serviceId, ServiceSettings settings) {
         if (settings == null || serviceId == null) {
-            log.error("Service settings cannot be null!");
+            log.warn("Service settings cannot be null!");
             return;
         }
         long currentTimeMillis = System.currentTimeMillis();
