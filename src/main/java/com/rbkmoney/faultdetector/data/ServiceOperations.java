@@ -32,9 +32,9 @@ public class ServiceOperations {
         if (serviceOperation.getEndTime() <= 0) {
             if (operation == null) {
                 operationsMap.put(operationId, serviceOperation);
-                log.info("New operation '{}' was added to OperationsMap (service id {})", serviceOperation, serviceId);
+                log.debug("New operation '{}' was added to OperationsMap (service id {})", serviceOperation, serviceId);
             } else {
-                log.info("For operation with service id {} and operation id {} was modified start time from {} to {}",
+                log.debug("For operation with service id {} and operation id {} was modified start time from {} to {}",
                         serviceId, operationId, operation.getStartTime(), serviceOperation.getStartTime());
                 operation.setStartTime(serviceOperation.getStartTime());
                 operationsMap.put(operationId, operation);
@@ -46,7 +46,7 @@ public class ServiceOperations {
             } else {
                 operation.setEndTime(serviceOperation.getEndTime());
                 operation.setError(serviceOperation.isError());
-                log.info("Operation with service id {} and operation id {} was finished with {} status",
+                log.debug("Operation with service id {} and operation id {} was finished with {} status",
                         serviceId, serviceOperation.getOperationId(), serviceOperation.isError() ? "ERROR" : "SUCCESS");
             }
         }
