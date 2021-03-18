@@ -40,7 +40,7 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
 
         Map<String, ServiceOperation> serviceOperationMap = serviceOperations.getServiceOperationsMap(serviceId);
         if (serviceOperationMap == null || serviceOperationMap.isEmpty()) {
-            log.info("The list of operations for the service {} is empty", serviceId);
+            log.debug("The list of operations for the service {} is empty", serviceId);
             preAggregates.addOperations(new HashSet<>());
             servicePreAggregates.addPreAggregates(serviceId, preAggregates);
         } else {
@@ -71,10 +71,10 @@ public class CalculatePreAggregatesHandler implements Handler<String> {
         if (preAggregatesDeque != null
                 && currentTimeMillis - preAggregatesDeque.getFirst().getAggregationTime() < preAggSize) {
             PreAggregates lastPreAggregates = preAggregatesDeque.getFirst();
-            log.info("Merge pre-aggregates for service '{}' : old - {} and additional - {}", serviceId,
+            log.debug("Merge pre-aggregates for service '{}' : old - {} and additional - {}", serviceId,
                     lastPreAggregates, preAggregates);
             mergePreAggregates(lastPreAggregates, preAggregates);
-            log.info("Result pre-aggregates for service '{}' after merge: {}", serviceId, lastPreAggregates);
+            log.debug("Result pre-aggregates for service '{}' after merge: {}", serviceId, lastPreAggregates);
         } else {
             if (preAggregatesDeque != null) {
                 preAggregatesDeque.getFirst().clearTempData();

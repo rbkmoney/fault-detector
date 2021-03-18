@@ -35,7 +35,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
         registerRunningOperCountMetrics(registry);
         registerOvertimeOperCountMetrics(registry);
         registerCompleteOpersAvgTimeMetrics(registry);
-        log.info("Metric registry after adding gauges for the service {}", serviceId);
+        log.debug("Metric registry after adding gauges for the service {}", serviceId);
     }
 
     private void registerFailureRateMetrics(MeterRegistry registry) {
@@ -47,7 +47,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                 .tags(TAGS)
                 .register(registry);
 
-        log.info(GAUGE_LOG_PATTERN, FAILURE_GAUGE_NAME + serviceId);
+        log.debug(GAUGE_LOG_PATTERN, FAILURE_GAUGE_NAME + serviceId);
     }
 
     private void registerOperCountMetrics(MeterRegistry registry) {
@@ -59,7 +59,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                 .tags(TAGS)
                 .register(registry);
 
-        log.info(GAUGE_LOG_PATTERN, OPER_COUNT_GAUGE_NAME + serviceId);
+        log.debug(GAUGE_LOG_PATTERN, OPER_COUNT_GAUGE_NAME + serviceId);
     }
 
     private void registerSuccessOperCountMetrics(MeterRegistry registry) {
@@ -73,7 +73,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                 .strongReference(true)
                 .register(registry);
 
-        log.info(GAUGE_LOG_PATTERN, SUCCESS_OPER_COUNT_GAUGE_NAME + serviceId);
+        log.debug(GAUGE_LOG_PATTERN, SUCCESS_OPER_COUNT_GAUGE_NAME + serviceId);
     }
 
     private void registerRunningOperCountMetrics(MeterRegistry registry) {
@@ -86,7 +86,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                 .tags(TAGS)
                 .register(registry);
 
-        log.info(GAUGE_LOG_PATTERN, RUNNING_OPER_COUNT_GAUGE_NAME + serviceId);
+        log.debug(GAUGE_LOG_PATTERN, RUNNING_OPER_COUNT_GAUGE_NAME + serviceId);
     }
 
     private void registerErrorOperCountMetrics(MeterRegistry registry) {
@@ -100,7 +100,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                 .strongReference(true)
                 .register(registry);
 
-        log.info(GAUGE_LOG_PATTERN, ERROR_OPER_COUNT_GAUGE_NAME + serviceId);
+        log.debug(GAUGE_LOG_PATTERN, ERROR_OPER_COUNT_GAUGE_NAME + serviceId);
     }
 
     private void registerOvertimeOperCountMetrics(MeterRegistry registry) {
@@ -113,7 +113,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                 .tags(TAGS)
                 .register(registry);
 
-        log.info(GAUGE_LOG_PATTERN, OVERTIME_OPER_COUNT_GAUGE_NAME + serviceId);
+        log.debug(GAUGE_LOG_PATTERN, OVERTIME_OPER_COUNT_GAUGE_NAME + serviceId);
     }
 
     private void registerCompleteOpersAvgTimeMetrics(MeterRegistry registry) {
@@ -126,7 +126,7 @@ public class FaultDetectorMetricsBinder implements MeterBinder {
                 .tags(TAGS)
                 .register(registry);
 
-        log.info(GAUGE_LOG_PATTERN, OPERS_AVG_TIME_GAUGE_NAME + serviceId);
+        log.debug(GAUGE_LOG_PATTERN, OPERS_AVG_TIME_GAUGE_NAME + serviceId);
     }
 
     private static String replacePrefix(String serviceId) {

@@ -32,7 +32,7 @@ public class OperationPreAggregatorService {
                         "for the service {}", serviceId, ex);
             }
         }
-        log.info("Operations pre-aggregations was finished");
+        log.debug("Operations pre-aggregations was finished");
     }
 
 }

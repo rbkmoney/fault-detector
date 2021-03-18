@@ -21,22 +21,22 @@ public class ServicePreAggregates {
         }
         preAggregatesSet.addFirst(preAggregates);
         servicePreAggregatesMap.put(serviceId, preAggregatesSet);
-        log.info("New pre-aggregates '{}' for service '{}' were added. Count of pre-aggregates: {} ",
+        log.debug("New pre-aggregates '{}' for service '{}' were added. Count of pre-aggregates: {} ",
                 preAggregates, serviceId, servicePreAggregatesMap.get(serviceId).size());
     }
 
     public void cleanPreAggregares(String serviceId, ServiceSettings settings) {
         if (servicePreAggregatesMap.containsKey(serviceId)) {
             Deque<PreAggregates> preAggregates = servicePreAggregatesMap.get(serviceId);
-            log.info("Total pre-aggregates before clean operation for service {}: {}",
+            log.debug("Total pre-aggregates before clean operation for service {}: {}",
                     serviceId, preAggregates == null ? 0 : preAggregates.size());
             if (preAggregates != null) {
                 long currentTime = System.currentTimeMillis();
                 long slidingWindow = settings.getSlidingWindow();
-                log.info("Clean pre-aggregates for service '{}' get started (sliding window - {}). " +
+                log.debug("Clean pre-aggregates for service '{}' get started (sliding window - {}). " +
                                 "Count of items before clean: {}", serviceId, slidingWindow, preAggregates.size());
                 preAggregates.removeIf(preAggregate -> currentTime - preAggregate.getAggregationTime() > slidingWindow);
-                log.info("Clean pre-aggregates for service '{}' finished. Count of items after clean: {}",
+                log.debug("Clean pre-aggregates for service '{}' finished. Count of items after clean: {}",
                         serviceId, preAggregates.size());
             }
         } else {
