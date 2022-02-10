@@ -1,0 +1,10 @@
+name: Maven Build Artifact
+
+on:
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    uses: valitydev/java-workflow/.github/workflows/maven-service-build.yml@v1

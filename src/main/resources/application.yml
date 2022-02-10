@@ -3,6 +3,9 @@ server:
 spring:
   application:
     name: @project.name@
+  output:
+    ansi:
+      enabled: always
 
 info:
   version: @project.version@
@@ -43,8 +46,20 @@ kafka:
 management:
   security:
     flag: false
+  server:
+    port: '@management.port@'
   metrics:
     export:
-      statsd:
-        flavor: etsy
-        enabled: false
+      prometheus:
+        enabled: true
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
